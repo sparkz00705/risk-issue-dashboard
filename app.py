@@ -44,14 +44,17 @@ st.markdown(
     " text parsing."
 )
 
-# --- DATA UPLOAD, LIVE-FORMULA TEMPLATE DOWNLOAD & SPECIFICATIONS ---
+# --- DATA UPLOAD, TEMPLATE DOWNLOAD & SPECIFICATIONS ---
 st.subheader("📁 Data Source Management")
 
-# Define numeric mapping weights for app-side fallback calculations
+# Define strict allowed dropdown options & score weight mappings
+VALID_PROBABILITIES = ["Low", "Medium", "High"]
+VALID_IMPACTS = ["Low", "Medium", "High", "Critical"]
+
 prob_weight = {"Low": 1, "Medium": 2, "High": 3}
 impact_weight = {"Low": 1, "Medium": 2, "High": 3, "Critical": 5}
 
-# Pre-templated dataset structure with live Excel formula string for Score
+# Pre-templated dataset structure for users to download
 template_data = pd.DataFrame({
     "ID": ["RSK-001", "RSK-002"],
     "Title": ["API Gateway Latency", "Key Developer Turnover"],
@@ -61,25 +64,31 @@ template_data = pd.DataFrame({
     "Status": ["Open", "Open"],
 })
 
-# Insert Excel formula mapping for dynamic live-calculation in Excel/Sheets
-# Assuming Probability is in Column D (index 4) and Impact is in Column E (index 5)
-# In standard spreadsheet logic using text weights, or mapping text to numbers via IF formulas:
-template_data["Score"] = [
-    '=IF(D2="High",3,IF(D2="Medium",2,1))*IF(E2="Critical",5,IF(E2="High",3,IF(E2="Medium",2,1)))',
-    '=IF(D3="High",3,IF(D3="Medium",2,1))*IF(E3="Critical",5,IF(E3="High",3,IF(E3="Medium",2,1)))',
-]
+# Auto-compute initial template score
+template_data["Score"] = template_data.apply(
+    lambda row: prob_weight.get(row["Probability"], 1)
+    * impact_weight.get(row["Impact"], 1),
+    axis=1,
+)
 
 csv_template = template_data.to_csv(index=False).encode("utf-8")
 
 st.download_button(
-    label="📥 Download Excel-Compatible Template (Auto-Calculates)",
+    label="📥 Download Standard Risk Template",
     data=csv_template,
     file_name="risk_template.csv",
     mime="text/csv",
     help=(
-        "Download template. The Score column contains active Excel formulas"
-        " that update when Probability or Impact change."
+        "Download template. Please use dropdown values (Low, Medium, High for"
+        " Probability; Low, Medium, High, Critical for Impact)."
     ),
+)
+
+st.info(
+    "💡 **Note for Users:** When filling out your spreadsheet, please select"
+    " Probability from **(Low, Medium, High)** and Impact from **(Low, Medium,"
+    " High, Critical)**. Scores are automatically calculated by the app upon"
+    " upload."
 )
 
 uploaded_file = st.file_uploader(
@@ -93,9 +102,37 @@ if uploaded_file is not None:
       data_risks = pd.read_csv(uploaded_file)
     else:
       data_risks = pd.read_excel(uploaded_file)
-    st.success("Custom dataset successfully loaded and applied!")
+
+    # Validate that columns exist
+    required_cols = [
+        "ID",
+        "Title",
+        "Category",
+        "Probability",
+        "Impact",
+        "Status",
+    ]
+    if all(col in data_risks.columns for col in required_cols):
+      # Auto-calculate and enforce score computation based on selected valid categories
+      data_risks["Probability"] = data_risks["Probability"].astype(str).str.strip()
+      data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
+
+      data_risks["Score"] = data_risks.apply(
+          lambda row: prob_weight.get(row["Probability"], 1)
+          * impact_weight.get(row["Impact"], 1),
+          axis=1,
+      )
+      st.success(
+          "Custom dataset successfully loaded, validated, and auto-scored!"
+      )
+    else:
+      st.error(
+          "Uploaded file is missing required columns. Falling back to default"
+          " mock data."
+      )
+      raise ValueError("Missing columns")
+
   except Exception as e:
-    st.error(f"Error reading file: {e}")
     # Fallback default risk data
     data_risks = pd.DataFrame({
         "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
