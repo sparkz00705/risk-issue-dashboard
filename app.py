@@ -94,7 +94,7 @@ col2.metric(
     label="Active Issues",
     value=len(data_issues[data_issues["Status"] != "Resolved"]),
     delta="+1 today",
-    delta_inverse=True,
+    # delta_inverse=True,
 )
 col3.metric(
     label="Materialized Risks",
