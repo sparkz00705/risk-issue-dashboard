@@ -44,14 +44,14 @@ st.markdown(
     " text parsing."
 )
 
-# --- DATA UPLOAD, AUTO-CALCULATED TEMPLATE DOWNLOAD & SPECIFICATIONS ---
+# --- DATA UPLOAD, LIVE-FORMULA TEMPLATE DOWNLOAD & SPECIFICATIONS ---
 st.subheader("📁 Data Source Management")
 
-# Define numeric mapping weights for auto-calculating scores
+# Define numeric mapping weights for app-side fallback calculations
 prob_weight = {"Low": 1, "Medium": 2, "High": 3}
 impact_weight = {"Low": 1, "Medium": 2, "High": 3, "Critical": 5}
 
-# Pre-templated dataset structure with auto-calculated scores
+# Pre-templated dataset structure with live Excel formula string for Score
 template_data = pd.DataFrame({
     "ID": ["RSK-001", "RSK-002"],
     "Title": ["API Gateway Latency", "Key Developer Turnover"],
@@ -61,34 +61,26 @@ template_data = pd.DataFrame({
     "Status": ["Open", "Open"],
 })
 
-# Auto-calculate Score column programmatically based on Probability & Impact weights
-template_data["Score"] = template_data.apply(
-    lambda row: prob_weight.get(row["Probability"], 1)
-    * impact_weight.get(row["Impact"], 1),
-    axis=1,
-)
+# Insert Excel formula mapping for dynamic live-calculation in Excel/Sheets
+# Assuming Probability is in Column D (index 4) and Impact is in Column E (index 5)
+# In standard spreadsheet logic using text weights, or mapping text to numbers via IF formulas:
+template_data["Score"] = [
+    '=IF(D2="High",3,IF(D2="Medium",2,1))*IF(E2="Critical",5,IF(E2="High",3,IF(E2="Medium",2,1)))',
+    '=IF(D3="High",3,IF(D3="Medium",2,1))*IF(E3="Critical",5,IF(E3="High",3,IF(E3="Medium",2,1)))',
+]
 
 csv_template = template_data.to_csv(index=False).encode("utf-8")
 
 st.download_button(
-    label="📥 Download Pre-templated Risk CSV (Auto-Calculated Scores)",
+    label="📥 Download Excel-Compatible Template (Auto-Calculates)",
     data=csv_template,
     file_name="risk_template.csv",
     mime="text/csv",
     help=(
-        "Download template. Scores are auto-calculated as Probability × Impact"
-        " weights."
+        "Download template. The Score column contains active Excel formulas"
+        " that update when Probability or Impact change."
     ),
 )
-
-# Required CSV Columns documentation guide:
-# - ID: Unique identifier string (e.g., RSK-001)
-# - Title: Short description of the risk or issue
-# - Category: Technical, Legal, Resource, Supply Chain, etc.
-# - Probability: High, Medium, Low
-# - Impact: Critical, High, Medium
-# - Score: Auto-computed Risk Score (Probability weight x Impact weight)
-# - Status: Open, Mitigated, or Materialized
 
 uploaded_file = st.file_uploader(
     "Upload your filled-in Risk/Issue CSV or Excel file:",
