@@ -44,10 +44,43 @@ st.markdown(
     " text parsing."
 )
 
-# --- DATA UPLOAD OR MOCK DATA PROVISION ---
+# --- DATA UPLOAD, TEMPLATE DOWNLOAD & COLUMN SPECIFICATION PROVISION ---
 st.subheader("📁 Data Source Management")
+
+# Pre-templated dataset structure for users to download
+template_data = pd.DataFrame({
+    "ID": ["RSK-001", "RSK-002"],
+    "Title": ["API Gateway Latency", "Key Developer Turnover"],
+    "Category": ["Technical", "Resource"],
+    "Probability": ["High", "Medium"],
+    "Impact": ["Critical", "High"],
+    "Score": [15, 6],
+    "Status": ["Open", "Open"],
+})
+csv_template = template_data.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    label="📥 Download Pre-templated Risk CSV",
+    data=csv_template,
+    file_name="risk_template.csv",
+    mime="text/csv",
+    help=(
+        "Download template. Required columns: ID, Title, Category, Probability,"
+        " Impact, Score, Status."
+    ),
+)
+
+# Required CSV Columns documentation guide:
+# - ID: Unique identifier string (e.g., RSK-001)
+# - Title: Short description of the risk or issue
+# - Category: Technical, Legal, Resource, Supply Chain, etc.
+# - Probability: High, Medium, Low
+# - Impact: Critical, High, Medium
+# - Score: Computed Risk Score (Probability x Impact product)
+# - Status: Open, Mitigated, or Materialized
+
 uploaded_file = st.file_uploader(
-    "Upload a custom Risk/Issue CSV or Excel file (Optional):",
+    "Upload your filled-in Risk/Issue CSV or Excel file:",
     type=["csv", "xlsx"],
 )
 
@@ -83,7 +116,7 @@ if uploaded_file is not None:
         "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
     })
 else:
-  # --- DEFAULT MOCK DATA & SCORE EXPLANATION LOGIC ---
+  # --- DEFAULT MOCK DATA & SCORE CALCULATION EXPLANATION ---
   # Risk Score calculation logic: Score = Probability weighting x Impact weighting
   # Probability: Low (1), Medium (2), High (3)
   # Impact: Medium (2), High (3), Critical (5)
