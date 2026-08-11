@@ -44,96 +44,140 @@ st.markdown(
     " text parsing."
 )
 
-# --- DATA UPLOAD, TEMPLATE DOWNLOAD & SPECIFICATIONS ---
+# --- DATA UPLOAD, TEMPLATE DOWNLOADS & SPECIFICATIONS ---
 st.subheader("📁 Data Source Management")
 
 # Define strict allowed dropdown options & score weight mappings
 VALID_PROBABILITIES = ["Low", "Medium", "High"]
 VALID_IMPACTS = ["Low", "Medium", "High", "Critical"]
+VALID_SEVERITIES = ["Low", "Medium", "High", "Critical"]
+VALID_STATUSES = ["Open", "In Progress", "Resolved", "Mitigated", "Materialized"]
 
 prob_weight = {"Low": 1, "Medium": 2, "High": 3}
 impact_weight = {"Low": 1, "Medium": 2, "High": 3, "Critical": 5}
 
-# Pre-templated dataset structure for users to download
-template_data = pd.DataFrame({
-    "ID": ["RSK-001", "RSK-002"],
-    "Title": ["API Gateway Latency", "Key Developer Turnover"],
-    "Category": ["Technical", "Resource"],
-    "Probability": ["High", "Medium"],
-    "Impact": ["Critical", "High"],
-    "Status": ["Open", "Open"],
-})
+# Two columns for downloading Risk and Issue templates separately
+col_dl1, col_dl2 = st.columns(2)
 
-# Auto-compute initial template score
-template_data["Score"] = template_data.apply(
-    lambda row: prob_weight.get(row["Probability"], 1)
-    * impact_weight.get(row["Impact"], 1),
-    axis=1,
-)
+with col_dl1:
+  risk_template = pd.DataFrame({
+      "ID": ["RSK-001", "RSK-002"],
+      "Title": ["API Gateway Latency", "Key Developer Turnover"],
+      "Category": ["Technical", "Resource"],
+      "Probability": ["High", "Medium"],
+      "Impact": ["Critical", "High"],
+      "Status": ["Open", "Open"],
+  })
+  risk_template["Score"] = risk_template.apply(
+      lambda row: prob_weight.get(row["Probability"], 1)
+      * impact_weight.get(row["Impact"], 1),
+      axis=1,
+  )
+  risk_csv = risk_template.to_csv(index=False).encode("utf-8")
 
-csv_template = template_data.to_csv(index=False).encode("utf-8")
+  st.download_button(
+      label="📥 Download Risk Template",
+      data=risk_csv,
+      file_name="risk_template.csv",
+      mime="text/csv",
+      help=(
+          "Probability dropdown: Low, Medium, High | Impact dropdown: Low,"
+          " Medium, High, Critical"
+      ),
+  )
 
-st.download_button(
-    label="📥 Download Standard Risk Template",
-    data=csv_template,
-    file_name="risk_template.csv",
-    mime="text/csv",
-    help=(
-        "Download template. Please use dropdown values (Low, Medium, High for"
-        " Probability; Low, Medium, High, Critical for Impact)."
-    ),
-)
+with col_dl2:
+  issue_template = pd.DataFrame({
+      "ID": ["ISS-001", "ISS-002"],
+      "Title": ["Auth Service Outage", "Client Rejected Prototype"],
+      "Category": ["Technical", "Product"],
+      "Severity": ["Critical", "High"],
+      "Status": ["In Progress", "Open"],
+      "Linked_Risk": ["RSK-001", "None"],
+  })
+  issue_csv = issue_template.to_csv(index=False).encode("utf-8")
+
+  st.download_button(
+      label="📥 Download Issue Template",
+      data=issue_csv,
+      file_name="issue_template.csv",
+      mime="text/csv",
+      help=(
+          "Severity dropdown: Low, Medium, High, Critical | Status dropdown:"
+          " Open, In Progress, Resolved"
+      ),
+  )
 
 st.info(
-    "💡 **Note for Users:** When filling out your spreadsheet, please select"
-    " Probability from **(Low, Medium, High)** and Impact from **(Low, Medium,"
-    " High, Critical)**. Scores are automatically calculated by the app upon"
-    " upload."
+    "💡 **Template Guidelines:** Please use strict categorical options for"
+    " dropdown fields. Risks require Probability *(Low, Medium, High)* and"
+    " Impact *(Low, Medium, High, Critical)*. Issues require Severity"
+    " *(Low, Medium, High, Critical)* and Status *(Open, In Progress,"
+    " Resolved)*."
 )
 
-uploaded_file = st.file_uploader(
-    "Upload your filled-in Risk/Issue CSV or Excel file:",
-    type=["csv", "xlsx"],
+# File uploader tabs or sections
+upload_tab1, upload_tab2 = st.tabs(
+    ["Upload Risk Register", "Upload Issue Log"]
 )
 
-if uploaded_file is not None:
-  try:
-    if uploaded_file.name.endswith(".csv"):
-      data_risks = pd.read_csv(uploaded_file)
-    else:
-      data_risks = pd.read_excel(uploaded_file)
+with upload_tab1:
+  uploaded_risk_file = st.file_uploader(
+      "Upload filled-in Risk CSV/Excel:", type=["csv", "xlsx"], key="risk_up"
+  )
+  if uploaded_risk_file is not None:
+    try:
+      if uploaded_risk_file.name.endswith(".csv"):
+        data_risks = pd.read_csv(uploaded_risk_file)
+      else:
+        data_risks = pd.read_excel(uploaded_risk_file)
 
-    # Validate that columns exist
-    required_cols = [
-        "ID",
-        "Title",
-        "Category",
-        "Probability",
-        "Impact",
-        "Status",
-    ]
-    if all(col in data_risks.columns for col in required_cols):
-      # Auto-calculate and enforce score computation based on selected valid categories
-      data_risks["Probability"] = data_risks["Probability"].astype(str).str.strip()
-      data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
-
-      data_risks["Score"] = data_risks.apply(
-          lambda row: prob_weight.get(row["Probability"], 1)
-          * impact_weight.get(row["Impact"], 1),
-          axis=1,
-      )
-      st.success(
-          "Custom dataset successfully loaded, validated, and auto-scored!"
-      )
-    else:
-      st.error(
-          "Uploaded file is missing required columns. Falling back to default"
-          " mock data."
-      )
-      raise ValueError("Missing columns")
-
-  except Exception as e:
-    # Fallback default risk data
+      required_risk_cols = [
+          "ID",
+          "Title",
+          "Category",
+          "Probability",
+          "Impact",
+          "Status",
+      ]
+      if all(col in data_risks.columns for col in required_risk_cols):
+        data_risks["Probability"] = (
+            data_risks["Probability"].astype(str).str.strip()
+        )
+        data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
+        data_risks["Score"] = data_risks.apply(
+            lambda row: prob_weight.get(row["Probability"], 1)
+            * impact_weight.get(row["Impact"], 1),
+            axis=1,
+        )
+        st.success("Custom Risk dataset loaded and auto-scored successfully!")
+      else:
+        st.error("Missing required columns in Risk file. Using default data.")
+        raise ValueError("Missing columns")
+    except Exception:
+      # Fallback risk data
+      data_risks = pd.DataFrame({
+          "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
+          "Title": [
+              "API Gateway Latency",
+              "Key Developer Turnover",
+              "Third-party Vendor Delay",
+              "Compliance Scope Creep",
+              "Database Scalability Limit",
+          ],
+          "Category": [
+              "Technical",
+              "Resource",
+              "Supply Chain",
+              "Legal",
+              "Technical",
+          ],
+          "Probability": ["High", "Medium", "Low", "High", "Medium"],
+          "Impact": ["Critical", "High", "Medium", "High", "Critical"],
+          "Score": [15, 9, 4, 12, 10],
+          "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+      })
+  else:
     data_risks = pd.DataFrame({
         "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
         "Title": [
@@ -155,43 +199,57 @@ if uploaded_file is not None:
         "Score": [15, 9, 4, 12, 10],
         "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
     })
-else:
-  # --- DEFAULT MOCK DATA & SCORE CALCULATION EXPLANATION ---
-  data_risks = pd.DataFrame({
-      "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
-      "Title": [
-          "API Gateway Latency",
-          "Key Developer Turnover",
-          "Third-party Vendor Delay",
-          "Compliance Scope Creep",
-          "Database Scalability Limit",
-      ],
-      "Category": [
-          "Technical",
-          "Resource",
-          "Supply Chain",
-          "Legal",
-          "Technical",
-      ],
-      "Probability": ["High", "Medium", "Low", "High", "Medium"],
-      "Impact": ["Critical", "High", "Medium", "High", "Critical"],
-      "Score": [15, 9, 4, 12, 10],
-      "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
-  })
 
-# Default Issue Log Data
-data_issues = pd.DataFrame({
-    "ID": ["ISS-001", "ISS-002", "ISS-003"],
-    "Title": [
-        "Auth Service Outage",
-        "Client Rejected Prototype",
-        "Staging Environment Down",
-    ],
-    "Category": ["Technical", "Product", "Infrastructure"],
-    "Severity": ["Critical", "High", "High"],
-    "Status": ["In Progress", "Open", "Resolved"],
-    "Linked_Risk": ["RSK-005", "None", "RSK-001"],
-})
+with upload_tab2:
+  uploaded_issue_file = st.file_uploader(
+      "Upload filled-in Issue CSV/Excel:", type=["csv", "xlsx"], key="issue_up"
+  )
+  if uploaded_issue_file is not None:
+    try:
+      if uploaded_issue_file.name.endswith(".csv"):
+        data_issues = pd.read_csv(uploaded_issue_file)
+      else:
+        data_issues = pd.read_excel(uploaded_issue_file)
+
+      required_issue_cols = [
+          "ID",
+          "Title",
+          "Category",
+          "Severity",
+          "Status",
+          "Linked_Risk",
+      ]
+      if all(col in data_issues.columns for col in required_issue_cols):
+        st.success("Custom Issue dataset loaded successfully!")
+      else:
+        st.error("Missing required columns in Issue file. Using default data.")
+        raise ValueError("Missing columns")
+    except Exception:
+      data_issues = pd.DataFrame({
+          "ID": ["ISS-001", "ISS-002", "ISS-003"],
+          "Title": [
+              "Auth Service Outage",
+              "Client Rejected Prototype",
+              "Staging Environment Down",
+          ],
+          "Category": ["Technical", "Product", "Infrastructure"],
+          "Severity": ["Critical", "High", "High"],
+          "Status": ["In Progress", "Open", "Resolved"],
+          "Linked_Risk": ["RSK-005", "None", "RSK-001"],
+      })
+  else:
+    data_issues = pd.DataFrame({
+        "ID": ["ISS-001", "ISS-002", "ISS-003"],
+        "Title": [
+            "Auth Service Outage",
+            "Client Rejected Prototype",
+            "Staging Environment Down",
+        ],
+        "Category": ["Technical", "Product", "Infrastructure"],
+        "Severity": ["Critical", "High", "High"],
+        "Status": ["In Progress", "Open", "Resolved"],
+        "Linked_Risk": ["RSK-005", "None", "RSK-001"],
+    })
 
 # --- TOP KPI METRICS ROW ---
 col1, col2, col3, col4 = st.columns(4)
