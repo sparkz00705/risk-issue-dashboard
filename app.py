@@ -12,12 +12,10 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Global Container Padding & Dark Aesthetic */
     div.block-container {
         padding-top: 2rem;
         background-color: #0f172a;
     }
-    /* Metric Cards Styling */
     div[data-testid="metric-container"] {
         background-color: #1e293b;
         border: 1px solid #334155;
@@ -25,7 +23,6 @@ st.markdown(
         border-radius: 12px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    /* Tab Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
     }
@@ -42,34 +39,77 @@ st.markdown(
 
 st.title("🛡️ AI-Powered Risk vs. Issue Dashboard")
 st.markdown(
-    "A professional-grade portfolio project tracking future uncertainties (Risks)"
-    " versus active operational roadblocks (Issues) with generative AI text"
-    " parsing."
+    "A professional-grade portfolio project tracking future uncertainties"
+    " (Risks) versus active operational roadblocks (Issues) with generative AI"
+    " text parsing."
 )
 
-# --- MOCK DATA ---
-data_risks = pd.DataFrame({
-    "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
-    "Title": [
-        "API Gateway Latency",
-        "Key Developer Turnover",
-        "Third-party Vendor Delay",
-        "Compliance Scope Creep",
-        "Database Scalability Limit",
-    ],
-    "Category": [
-        "Technical",
-        "Resource",
-        "Supply Chain",
-        "Legal",
-        "Technical",
-    ],
-    "Probability": ["High", "Medium", "Low", "High", "Medium"],
-    "Impact": ["Critical", "High", "Medium", "High", "Critical"],
-    "Score": [15, 9, 4, 12, 10],
-    "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
-})
+# --- DATA UPLOAD OR MOCK DATA PROVISION ---
+st.subheader("📁 Data Source Management")
+uploaded_file = st.file_uploader(
+    "Upload a custom Risk/Issue CSV or Excel file (Optional):",
+    type=["csv", "xlsx"],
+)
 
+if uploaded_file is not None:
+  try:
+    if uploaded_file.name.endswith(".csv"):
+      data_risks = pd.read_csv(uploaded_file)
+    else:
+      data_risks = pd.read_excel(uploaded_file)
+    st.success("Custom dataset successfully loaded and applied!")
+  except Exception as e:
+    st.error(f"Error reading file: {e}")
+    # Fallback default risk data
+    data_risks = pd.DataFrame({
+        "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
+        "Title": [
+            "API Gateway Latency",
+            "Key Developer Turnover",
+            "Third-party Vendor Delay",
+            "Compliance Scope Creep",
+            "Database Scalability Limit",
+        ],
+        "Category": [
+            "Technical",
+            "Resource",
+            "Supply Chain",
+            "Legal",
+            "Technical",
+        ],
+        "Probability": ["High", "Medium", "Low", "High", "Medium"],
+        "Impact": ["Critical", "High", "Medium", "High", "Critical"],
+        "Score": [15, 9, 4, 12, 10],
+        "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+    })
+else:
+  # --- DEFAULT MOCK DATA & SCORE EXPLANATION LOGIC ---
+  # Risk Score calculation logic: Score = Probability weighting x Impact weighting
+  # Probability: Low (1), Medium (2), High (3)
+  # Impact: Medium (2), High (3), Critical (5)
+  data_risks = pd.DataFrame({
+      "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
+      "Title": [
+          "API Gateway Latency",
+          "Key Developer Turnover",
+          "Third-party Vendor Delay",
+          "Compliance Scope Creep",
+          "Database Scalability Limit",
+      ],
+      "Category": [
+          "Technical",
+          "Resource",
+          "Supply Chain",
+          "Legal",
+          "Technical",
+      ],
+      "Probability": ["High", "Medium", "Low", "High", "Medium"],
+      "Impact": ["Critical", "High", "Medium", "High", "Critical"],
+      "Score": [15, 9, 4, 12, 10],
+      "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+  })
+
+# Default Issue Log Data
 data_issues = pd.DataFrame({
     "ID": ["ISS-001", "ISS-002", "ISS-003"],
     "Title": [
@@ -94,7 +134,6 @@ col2.metric(
     label="Active Issues",
     value=len(data_issues[data_issues["Status"] != "Resolved"]),
     delta="+1 today",
-    # delta_inverse=True,
 )
 col3.metric(
     label="Materialized Risks",
@@ -114,16 +153,15 @@ st.markdown(
 project_update = st.text_area(
     "Project Notes / Status Update:",
     placeholder=(
-        "Example: Team noted potential bottlenecks in staging environment setup."
-        " Also, client approval for UI wireframes is currently delayed by 3"
-        " days."
+        "Example: Team noted potential bottlenecks in staging environment"
+        " setup. Also, client approval for UI wireframes is currently"
+        " delayed by 3 days."
     ),
 )
 
 if st.button("Extract Risks & Issues with AI", type="primary"):
   if project_update:
     with st.spinner("Analyzing text using semantic AI extraction..."):
-      # Simulated AI analysis results
       st.success("Analysis complete! Extracted insights below:")
       ai_col1, ai_col2 = st.columns(2)
       with ai_col1:
@@ -140,34 +178,41 @@ if st.button("Extract Risks & Issues with AI", type="primary"):
 
 st.markdown("---")
 
-# --- SECTION 2: VISUALIZATIONS ---
+# --- SECTION 2: VISUALIZATIONS & SCORE EXPLANATION ---
 c1, c2 = st.columns(2)
 
 with c1:
-    st.subheader("⚠️ Risk Matrix Heatmap")
-    fig_risk = px.scatter(
-        data_risks,
-        x="Probability",
-        y="Impact",
-        color="Category",
-        hover_data=["Title", "ID"],
-        size="Score",
-        title="Active Risk Distribution",
-        template="plotly_dark",
-    )
-    st.plotly_chart(fig_risk, use_container_width=True)
+  st.subheader("⚠️ Risk Matrix Heatmap")
+  st.caption(
+      "Note: Bubble size represents the Risk Score (Score = Probability ×"
+      " Impact)."
+  )
+  fig_risk = px.scatter(
+      data_risks,
+      x="Probability",
+      y="Impact",
+      color="Category",
+      hover_data=["Title", "ID"],
+      size="Score",
+      title="Active Risk Distribution",
+      template="plotly_dark",
+  )
+  st.plotly_chart(fig_risk, use_container_width=True)
 
 with c2:
-    st.subheader("🔥 Issues by Category & Severity")
-    fig_issue = px.bar(
-        data_issues,
-        x="Category",
-        color="Severity",
-        title="Current Active Roadblocks",
-        barmode="group",
-        template="plotly_dark",
-    )
-    st.plotly_chart(fig_issue, use_container_width=True)
+  st.subheader("🔥 Issues by Category & Severity")
+  st.caption(
+      "Tracking active operational blocks currently hindering execution."
+  )
+  fig_issue = px.bar(
+      data_issues,
+      x="Category",
+      color="Severity",
+      title="Current Active Roadblocks",
+      barmode="group",
+      template="plotly_dark",
+  )
+  st.plotly_chart(fig_issue, use_container_width=True)
 
 st.markdown("---")
 
@@ -176,7 +221,17 @@ st.subheader("📋 Core Records & Logs")
 tab1, tab2 = st.tabs(["Active Risk Register", "Active Issue Log"])
 
 with tab1:
+  st.markdown("### Risk Register Explanation")
+  st.markdown(
+      "Risks are future uncertain events that *might* happen. The **Score** is"
+      " quantified using the matrix formula: **Score = Probability × Impact**."
+  )
   st.dataframe(data_risks, use_container_width=True)
 
 with tab2:
+  st.markdown("### Issue Log Explanation")
+  st.markdown(
+      "Issues are current realized problems that require immediate operational"
+      " remediation. Many issues originate directly from materialized risks."
+  )
   st.dataframe(data_issues, use_container_width=True)
