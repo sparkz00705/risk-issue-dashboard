@@ -44,29 +44,40 @@ st.markdown(
     " text parsing."
 )
 
-# --- DATA UPLOAD, TEMPLATE DOWNLOAD & COLUMN SPECIFICATION PROVISION ---
+# --- DATA UPLOAD, AUTO-CALCULATED TEMPLATE DOWNLOAD & SPECIFICATIONS ---
 st.subheader("📁 Data Source Management")
 
-# Pre-templated dataset structure for users to download
+# Define numeric mapping weights for auto-calculating scores
+prob_weight = {"Low": 1, "Medium": 2, "High": 3}
+impact_weight = {"Low": 1, "Medium": 2, "High": 3, "Critical": 5}
+
+# Pre-templated dataset structure with auto-calculated scores
 template_data = pd.DataFrame({
     "ID": ["RSK-001", "RSK-002"],
     "Title": ["API Gateway Latency", "Key Developer Turnover"],
     "Category": ["Technical", "Resource"],
     "Probability": ["High", "Medium"],
     "Impact": ["Critical", "High"],
-    "Score": [15, 6],
     "Status": ["Open", "Open"],
 })
+
+# Auto-calculate Score column programmatically based on Probability & Impact weights
+template_data["Score"] = template_data.apply(
+    lambda row: prob_weight.get(row["Probability"], 1)
+    * impact_weight.get(row["Impact"], 1),
+    axis=1,
+)
+
 csv_template = template_data.to_csv(index=False).encode("utf-8")
 
 st.download_button(
-    label="📥 Download Pre-templated Risk CSV",
+    label="📥 Download Pre-templated Risk CSV (Auto-Calculated Scores)",
     data=csv_template,
     file_name="risk_template.csv",
     mime="text/csv",
     help=(
-        "Download template. Required columns: ID, Title, Category, Probability,"
-        " Impact, Score, Status."
+        "Download template. Scores are auto-calculated as Probability × Impact"
+        " weights."
     ),
 )
 
@@ -76,7 +87,7 @@ st.download_button(
 # - Category: Technical, Legal, Resource, Supply Chain, etc.
 # - Probability: High, Medium, Low
 # - Impact: Critical, High, Medium
-# - Score: Computed Risk Score (Probability x Impact product)
+# - Score: Auto-computed Risk Score (Probability weight x Impact weight)
 # - Status: Open, Mitigated, or Materialized
 
 uploaded_file = st.file_uploader(
@@ -117,9 +128,6 @@ if uploaded_file is not None:
     })
 else:
   # --- DEFAULT MOCK DATA & SCORE CALCULATION EXPLANATION ---
-  # Risk Score calculation logic: Score = Probability weighting x Impact weighting
-  # Probability: Low (1), Medium (2), High (3)
-  # Impact: Medium (2), High (3), Critical (5)
   data_risks = pd.DataFrame({
       "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
       "Title": [
