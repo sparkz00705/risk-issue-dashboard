@@ -5,7 +5,7 @@ import streamlit as st
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
-    page_title="AI Risk vs. Issue Intelligence Dashboard",
+    page_title="AI-Powered Risk vs. Issue Dashboard",
     layout="wide",
     page_icon="🛡️",
 )
@@ -38,11 +38,12 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("🛡️ AI-Powered Risk vs. Issue Dashboard")
+st.title("🛡️ Intelligent Risk Management powered by real-time data")
 st.markdown(
-    "A professional portfolio project tracking future uncertainties"
-    " (Risks) versus active operational roadblocks (Issues) with real-time AI"
-    " text parsing."
+    "From potential risk to absolute resolution: Real-time project intelligence"
+   # "A professional portfolio project tracking future uncertainties"
+   # " (Risks) versus active operational roadblocks (Issues) with real-time AI"
+   # " text parsing."
 )
 
 # --- DATA UPLOAD, TEMPLATE DOWNLOADS & SPECIFICATIONS ---
