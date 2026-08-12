@@ -224,7 +224,7 @@ col4.metric(label="Risk-to-Issue Conversion Rate", value="20%")
 st.markdown("---")
 
 # --- REAL-TIME GENAI PARSER SECTION ---
-st.subheader("🤖 Live GenAI Status Update Parser")
+st.subheader("🤖 Project Status Update")
 st.markdown("Click the button below to have the real-time AI evaluate your current Risk Register and Issue Log, generate the RAG status, and provide executive recommendations.")
 
 if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="primary"):
