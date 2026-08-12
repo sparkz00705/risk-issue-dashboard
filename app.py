@@ -225,61 +225,45 @@ st.markdown("---")
 
 # --- REAL-TIME GENAI PARSER SECTION ---
 st.subheader("🤖 Live GenAI Status Update Parser")
-st.markdown(
-    "Paste live meeting notes or status updates below. The application uses"
-    " real-time AI to analyze text and extract authentic risks and issues."
-)
+st.markdown("Click the button below to have the real-time AI evaluate your current Risk Register and Issue Log, generate the RAG status, and provide executive recommendations.")
 
-project_update = st.text_area(
-    "Project Notes / Status Update:",
-    placeholder=(
-       # "Type or paste any raw meeting notes here... (e.g., 'We noticed memory"
-       # " leaks in the database server, and the QA team is blocked because"
-       # " staging credentials expired.')"
-    ),
-)
-
-if st.button("Extract Risks & Issues with Live AI", type="primary"):
-    if project_update:
-        with st.spinner("Querying real-time AI model..."):
-            try:
-                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                
-                risk_summary = data_risks.to_string(index=False)
-                issue_summary = data_issues.to_string(index=False)
-                
-                prompt = f"""
-                You are a senior project portfolio director. Analyze the project data and user request below.
-                
-                CURRENT ACTIVE RISK REGISTER:
-                {risk_summary}
-                
-                CURRENT ACTIVE ISSUE LOG:
-                {issue_summary}
-                
-                USER REQUEST / NOTES:
-                {project_update}
-                
-                Task:
-                1. Determine and state the Project RAG Status (RED, AMBER, or GREEN) with clear executive justification.
-                2. Identify Discovered Risks and Active Issues.
-                3. Provide concrete, step-by-step recommendations on how to remediate these blocks and turn the project status to Green.
-                
-                Format your response with these exact markdown headers:
-                ## Project RAG Status: [RED/AMBER/GREEN]
-                ### Executive Summary Justification
-                ### Discovered Risk
-                ### Discovered Issue
-                ### Action Plan to Turn Status Green
-                """
-                
-                response = client.models.generate_content(
-                    model="gemini-3.6-flash", contents=prompt
-                )
-                st.success("Real-time AI analysis complete!")
-                st.markdown(response.text)
-            except Exception as e:
-                st.error(f"API Error: {e}")
+if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="primary"):
+    with st.spinner("Querying real-time AI model..."):
+        try:
+            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+            
+            risk_summary = data_risks.to_string(index=False)
+            issue_summary = data_issues.to_string(index=False)
+            
+            prompt = f"""
+            You are a senior project portfolio director. Analyze the project registers below.
+            
+            CURRENT ACTIVE RISK REGISTER:
+            {risk_summary}
+            
+            CURRENT ACTIVE ISSUE LOG:
+            {issue_summary}
+            
+            Task:
+            1. Determine and state the Project RAG Status (RED, AMBER, or GREEN) with clear executive justification.
+            2. Identify any materialized risks and active issues.
+            3. Provide concrete, step-by-step recommendations on how to remediate blocks and turn the project status to Green.
+            
+            Format your response with these exact markdown headers:
+            ## Project RAG Status: [RED/AMBER/GREEN]
+            ### Executive Summary Justification
+            ### Discovered Risk / Materialized Risks
+            ### Active Issues
+            ### Action Plan to Turn Status Green
+            """
+            
+            response = client.models.generate_content(
+                model="gemini-2.5-flash", contents=prompt
+            )
+            st.success("Real-time AI analysis complete!")
+            st.markdown(response.text)
+        except Exception as e:
+            st.error(f"API Error: {e}")
     else:
         st.warning("Please paste project notes text before running the AI parser.")
 
