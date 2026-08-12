@@ -240,20 +240,18 @@ project_update = st.text_area(
 )
 
 if st.button("Extract Risks & Issues with Live AI", type="primary"):
-  if project_update:
-    with st.spinner("Querying real-time AI model..."):
-      try:
-        # Initialize Gemini client using Streamlit secrets
-        client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-
-          # Convert active risk and issue tables into text context for the model
-          risk_summary = data_risks.to_string(index=False)
-          issue_summary = data_issues.to_string(index=False)
-       
-          prompt = f"""
-          
-           You are a senior risk management expert. Analyze the current project data and the new status update below.
-              CURRENT ACTIVE RISK REGISTER:
+    if project_update:
+        with st.spinner("Querying real-time AI model..."):
+            try:
+                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                
+                risk_summary = data_risks.to_string(index=False)
+                issue_summary = data_issues.to_string(index=False)
+                
+                prompt = f"""
+                You are a senior risk management expert. Analyze the current project data and the new status update below.
+                
+                CURRENT ACTIVE RISK REGISTER:
                 {risk_summary}
                 
                 CURRENT ACTIVE ISSUE LOG:
@@ -272,21 +270,16 @@ if st.button("Extract Risks & Issues with Live AI", type="primary"):
                 ### Discovered Issue
                 ### AI Predictive Insights (Based on current register data)
                 """
-
-        response = client.models.generate_content(
-            model="gemini-3.6-flash", contents=prompt
-        )
-
-        st.success("Real-time AI analysis complete!")
-        st.markdown(response.text)
-
-      except Exception as e:
-        st.error(
-            f"API Error: {e}. Please ensure 'GEMINI_API_KEY' is added to your"
-            " Streamlit secrets."
-        )
-  else:
-    st.warning("Please paste project notes text before running the AI parser.")
+                
+                response = client.models.generate_content(
+                    model="gemini-3.6-flash", contents=prompt
+                )
+                st.success("Real-time AI analysis complete!")
+                st.markdown(response.text)
+            except Exception as e:
+                st.error(f"API Error: {e}")
+    else:
+        st.warning("Please paste project notes text before running the AI parser.")
 
 st.markdown("---")
 
