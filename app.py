@@ -264,9 +264,7 @@ if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="prima
             st.markdown(response.text)
         except Exception as e:
             st.error(f"API Error: {e}")
-    else:
-        st.warning("Please paste project notes text before running the AI parser.")
-
+            
 st.markdown("---")
 
 # --- SECTION 2: VISUALIZATIONS & SCORE EXPLANATION ---
