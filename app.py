@@ -226,9 +226,19 @@ st.markdown("---")
 
 # --- REAL-TIME GENAI PARSER SECTION ---
 st.subheader("🤖 Project Status Update")
-st.markdown("Click the button below to have the real-time AI evaluate your current Risk Register and Issue Log, generate the RAG status, and provide executive recommendations.")
+st.markdown("Click the button below to have the real-time AI evaluate your current Risk Register and Issue Log, generate the RAG status report as a standalone HTML file.")
 
-if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="primary"):
+# Place the button and download button side by side using columns
+col_gen1, col_gen2 = st.columns([2, 2])
+
+with col_gen1:
+    generate_clicked = st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="primary")
+
+# Initialize session state for the report if it doesn't exist
+if "ai_report_text" not in st.session_state:
+    st.session_state["ai_report_text"] = None
+
+if generate_clicked:
     with st.spinner("Querying real-time AI model..."):
         try:
             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
@@ -246,7 +256,7 @@ if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="prima
             {issue_summary}
             
             Task:
-            Generate a complete executive project status report following this exact template structure:
+            Generate a complete executive project status report following this exact template structure using Markdown:
             
             ## 📊 Executive Project Status Report
             - **Overall Project RAG Status:** [RED / AMBER / GREEN]
@@ -266,17 +276,42 @@ if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="prima
             """
             
             response = client.models.generate_content(
-                model="gemini-3.6-flash", contents=prompt
+                model="gemini-2.5-flash", contents=prompt
             )
-            st.success("Real-time AI analysis complete!")
-            
-            # Display inside a clean container mimicking a status report document
-            st.markdown("---")
-            st.markdown(response.text)
-            st.markdown("---")
-            
+            st.session_state["ai_report_text"] = response.text
+            st.success("Real-time AI analysis complete! Download your report below.")
         except Exception as e:
             st.error(f"API Error: {e}")
+
+# If the report has been generated, render the HTML download link dynamically beside the control (without displaying text on screen)
+if st.session_state["ai_report_text"]:
+    # Convert the Markdown report output into clean HTML
+    report_html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Executive Project Status Report</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 40px auto; padding: 20px; background: #fdfdfd; }}
+        h2 {{ color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }}
+        h3 {{ color: #334155; margin-top: 24px; }}
+        ul {{ margin-bottom: 20px; }}
+        li {{ margin-bottom: 6px; }}
+    </style>
+</head>
+<body>
+    {st.session_state["ai_report_text"].replace('## ', '<h2>').replace('### ', '<h3>').replace('\n- ', '<br>• ')}
+</body>
+</html>"""
+    
+    with col_gen2:
+        st.download_button(
+            label="📥 Download Project Status Report (HTML)",
+            data=report_html,
+            file_name="executive_project_status_report.html",
+            mime="text/html",
+            type="secondary"
+        )
             
 st.markdown("---")
 
