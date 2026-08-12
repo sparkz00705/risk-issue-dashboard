@@ -285,16 +285,15 @@ if generate_clicked:
 
 # If the report has been generated, render the HTML download link dynamically beside the control (without displaying text on screen)
 if st.session_state["ai_report_text"]:
-   # Determine color style dynamically based on AI response text
-    rag_color = "#333"
-    if "RED" in st.session_state["ai_report_text"][:200]:
-        rag_color = "#dc2626"  # Red
-    elif "AMBER" in st.session_state["ai_report_text"][:200]:
-        rag_color = "#d97706"  # Amber / Orange
-    elif "GREEN" in st.session_state["ai_report_text"][:200]:
-        rag_color = "#16a34a"  # Green
-   
-    # Convert the Markdown report output into clean HTML
+    # Format the Markdown report output into clean HTML first
+    body_content = st.session_state["ai_report_text"]
+    body_content = body_content.replace('## ', '<h2>').replace('### ', '<h3>').replace('\n- ', '<br>• ')
+    
+    # Apply dynamic font colors to the RAG status text explicitly inside the HTML
+    body_content = body_content.replace('RED', '<span style="color: #dc2626; font-weight: bold; font-size: 1.2em;">RED</span>')
+    body_content = body_content.replace('AMBER', '<span style="color: #d97706; font-weight: bold; font-size: 1.2em;">AMBER</span>')
+    body_content = body_content.replace('GREEN', '<span style="color: #16a34a; font-weight: bold; font-size: 1.2em;">GREEN</span>')
+
     report_html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -309,7 +308,7 @@ if st.session_state["ai_report_text"]:
     </style>
 </head>
 <body>
-    {st.session_state["ai_report_text"].replace('## ', '<h2>').replace('### ', '<h3>').replace('\n- ', '<br>• ')}
+    {body_content}
 </body>
 </html>"""
     
