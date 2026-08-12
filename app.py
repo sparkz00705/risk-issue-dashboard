@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.express as px
+from google import genai
 import streamlit as st
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
@@ -40,23 +41,18 @@ st.markdown(
 st.title("🛡️ AI-Powered Risk vs. Issue Dashboard")
 st.markdown(
     "A professional-grade portfolio project tracking future uncertainties"
-    " (Risks) versus active operational roadblocks (Issues) with generative AI"
+    " (Risks) versus active operational roadblocks (Issues) with real-time AI"
     " text parsing."
 )
 
 # --- DATA UPLOAD, TEMPLATE DOWNLOADS & SPECIFICATIONS ---
 st.subheader("📁 Data Source Management")
 
-# Define strict allowed dropdown options & score weight mappings
 VALID_PROBABILITIES = ["Low", "Medium", "High"]
 VALID_IMPACTS = ["Low", "Medium", "High", "Critical"]
-VALID_SEVERITIES = ["Low", "Medium", "High", "Critical"]
-VALID_STATUSES = ["Open", "In Progress", "Resolved", "Mitigated", "Materialized"]
-
 prob_weight = {"Low": 1, "Medium": 2, "High": 3}
 impact_weight = {"Low": 1, "Medium": 2, "High": 3, "Critical": 5}
 
-# Two columns for downloading Risk and Issue templates separately
 col_dl1, col_dl2 = st.columns(2)
 
 with col_dl1:
@@ -74,16 +70,11 @@ with col_dl1:
       axis=1,
   )
   risk_csv = risk_template.to_csv(index=False).encode("utf-8")
-
   st.download_button(
       label="📥 Download Risk Template",
       data=risk_csv,
       file_name="risk_template.csv",
       mime="text/csv",
-      help=(
-          "Probability dropdown: Low, Medium, High | Impact dropdown: Low,"
-          " Medium, High, Critical"
-      ),
   )
 
 with col_dl2:
@@ -96,27 +87,13 @@ with col_dl2:
       "Linked_Risk": ["RSK-001", "None"],
   })
   issue_csv = issue_template.to_csv(index=False).encode("utf-8")
-
   st.download_button(
       label="📥 Download Issue Template",
       data=issue_csv,
       file_name="issue_template.csv",
       mime="text/csv",
-      help=(
-          "Severity dropdown: Low, Medium, High, Critical | Status dropdown:"
-          " Open, In Progress, Resolved"
-      ),
   )
 
-st.info(
-    "💡 **Template Guidelines:** Please use strict categorical options for"
-    " dropdown fields. Risks require Probability *(Low, Medium, High)* and"
-    " Impact *(Low, Medium, High, Critical)*. Issues require Severity"
-    " *(Low, Medium, High, Critical)* and Status *(Open, In Progress,"
-    " Resolved)*."
-)
-
-# File uploader tabs or sections
 upload_tab1, upload_tab2 = st.tabs(
     ["Upload Risk Register", "Upload Issue Log"]
 )
@@ -127,35 +104,22 @@ with upload_tab1:
   )
   if uploaded_risk_file is not None:
     try:
-      if uploaded_risk_file.name.endswith(".csv"):
-        data_risks = pd.read_csv(uploaded_risk_file)
-      else:
-        data_risks = pd.read_excel(uploaded_risk_file)
-
-      required_risk_cols = [
-          "ID",
-          "Title",
-          "Category",
-          "Probability",
-          "Impact",
-          "Status",
-      ]
-      if all(col in data_risks.columns for col in required_risk_cols):
-        data_risks["Probability"] = (
-            data_risks["Probability"].astype(str).str.strip()
-        )
-        data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
-        data_risks["Score"] = data_risks.apply(
-            lambda row: prob_weight.get(row["Probability"], 1)
-            * impact_weight.get(row["Impact"], 1),
-            axis=1,
-        )
-        st.success("Custom Risk dataset loaded and auto-scored successfully!")
-      else:
-        st.error("Missing required columns in Risk file. Using default data.")
-        raise ValueError("Missing columns")
+      data_risks = (
+          pd.read_csv(uploaded_risk_file)
+          if uploaded_risk_file.name.endswith(".csv")
+          else pd.read_excel(uploaded_risk_file)
+      )
+      data_risks["Probability"] = (
+          data_risks["Probability"].astype(str).str.strip()
+      )
+      data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
+      data_risks["Score"] = data_risks.apply(
+          lambda row: prob_weight.get(row["Probability"], 1)
+          * impact_weight.get(row["Impact"], 1),
+          axis=1,
+      )
+      st.success("Custom Risk dataset loaded and auto-scored successfully!")
     except Exception:
-      # Fallback risk data
       data_risks = pd.DataFrame({
           "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
           "Title": [
@@ -206,24 +170,12 @@ with upload_tab2:
   )
   if uploaded_issue_file is not None:
     try:
-      if uploaded_issue_file.name.endswith(".csv"):
-        data_issues = pd.read_csv(uploaded_issue_file)
-      else:
-        data_issues = pd.read_excel(uploaded_issue_file)
-
-      required_issue_cols = [
-          "ID",
-          "Title",
-          "Category",
-          "Severity",
-          "Status",
-          "Linked_Risk",
-      ]
-      if all(col in data_issues.columns for col in required_issue_cols):
-        st.success("Custom Issue dataset loaded successfully!")
-      else:
-        st.error("Missing required columns in Issue file. Using default data.")
-        raise ValueError("Missing columns")
+      data_issues = (
+          pd.read_csv(uploaded_issue_file)
+          if uploaded_issue_file.name.endswith(".csv")
+          else pd.read_excel(uploaded_issue_file)
+      )
+      st.success("Custom Issue dataset loaded successfully!")
     except Exception:
       data_issues = pd.DataFrame({
           "ID": ["ISS-001", "ISS-002", "ISS-003"],
@@ -271,38 +223,58 @@ col4.metric(label="Risk-to-Issue Conversion Rate", value="20%")
 
 st.markdown("---")
 
-# --- AI ASSISTANT SECTION ---
-st.subheader("🤖 GenAI Status Update Parser")
+# --- REAL-TIME GENAI PARSER SECTION ---
+st.subheader("🤖 Live GenAI Status Update Parser")
 st.markdown(
-    "Paste raw weekly meeting notes, Slack logs, or status updates to let the"
-    " simulated LLM classify and extract items."
+    "Paste live meeting notes or status updates below. The application uses"
+    " real-time AI to analyze text and extract authentic risks and issues."
 )
 
 project_update = st.text_area(
     "Project Notes / Status Update:",
     placeholder=(
-        "Example: Team noted potential bottlenecks in staging environment"
-        " setup. Also, client approval for UI wireframes is currently"
-        " delayed by 3 days."
+        "Type or paste any raw meeting notes here... (e.g., 'We noticed memory"
+        " leaks in the database server, and the QA team is blocked because"
+        " staging credentials expired.')"
     ),
 )
 
-if st.button("Extract Risks & Issues with AI", type="primary"):
+if st.button("Extract Risks & Issues with Live AI", type="primary"):
   if project_update:
-    with st.spinner("Analyzing text using semantic AI extraction..."):
-      st.success("Analysis complete! Extracted insights below:")
-      ai_col1, ai_col2 = st.columns(2)
-      with ai_col1:
-        st.markdown("**🚨 Discovered Risk:**")
-        st.info(
-            "Staging environment configuration drift could cause deployment"
-            " delays."
+    with st.spinner("Querying real-time AI model..."):
+      try:
+        # Initialize Gemini client using Streamlit secrets
+        client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+
+        prompt = f"""
+                Analyze the following project update text. Extract clearly:
+                1. A potential future Risk (uncertainty).
+                2. A current active Issue (realized roadblock).
+
+                Format your response clearly with headings:
+                ### Discovered Risk
+                (Extracted risk statement)
+                ### Discovered Issue
+                (Extracted issue statement)
+
+                Text to analyze:
+                {project_update}
+                """
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", contents=prompt
         )
-      with ai_col2:
-        st.markdown("**🔥 Discovered Issue:**")
-        st.warning("Client approval delay on UI wireframes impacting Sprint 4.")
+
+        st.success("Real-time AI analysis complete!")
+        st.markdown(response.text)
+
+      except Exception as e:
+        st.error(
+            f"API Error: {e}. Please ensure 'GEMINI_API_KEY' is added to your"
+            " Streamlit secrets."
+        )
   else:
-    st.warning("Please paste some project notes text first.")
+    st.warning("Please paste project notes text before running the AI parser.")
 
 st.markdown("---")
 
