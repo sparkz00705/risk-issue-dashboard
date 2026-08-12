@@ -266,7 +266,7 @@ if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="prima
             """
             
             response = client.models.generate_content(
-                model="gemini-3.6-flash", contents=prompt
+                model="gemini-2.5-flash", contents=prompt
             )
             st.success("Real-time AI analysis complete!")
             
