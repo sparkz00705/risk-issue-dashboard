@@ -247,8 +247,8 @@ if st.button("Extract Risks & Issues with Live AI", type="primary"):
         client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
           # Convert active risk and issue tables into text context for the model
-                risk_summary = data_risks.to_string(index=False)
-                issue_summary = data_issues.to_string(index=False)
+          risk_summary = data_risks.to_string(index=False)
+          issue_summary = data_issues.to_string(index=False)
        
           prompt = f"""
           
