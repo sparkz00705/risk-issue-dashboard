@@ -315,16 +315,19 @@ if st.session_state["ai_report_text"]:
 <html>
 <head>
 # --- GOOGLE ANALYTICS INTEGRATION ---
-ga_script = """
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-60MBXMF62S');
-</script>
+st.markdown(
+    """
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-60MBXMF62S');
+    </script>
+    """,
+    unsafe_allow_html=True
+)
 """
 # Inject the tracking code into the page head using components
 import streamlit.components.v1 as components
