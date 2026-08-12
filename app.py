@@ -285,6 +285,15 @@ if generate_clicked:
 
 # If the report has been generated, render the HTML download link dynamically beside the control (without displaying text on screen)
 if st.session_state["ai_report_text"]:
+   # Determine color style dynamically based on AI response text
+    rag_color = "#333"
+    if "RED" in st.session_state["ai_report_text"][:200]:
+        rag_color = "#dc2626"  # Red
+    elif "AMBER" in st.session_state["ai_report_text"][:200]:
+        rag_color = "#d97706"  # Amber / Orange
+    elif "GREEN" in st.session_state["ai_report_text"][:200]:
+        rag_color = "#16a34a"  # Green
+   
     # Convert the Markdown report output into clean HTML
     report_html = f"""<!DOCTYPE html>
 <html>
