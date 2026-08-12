@@ -27,10 +27,6 @@ if "analytics_loaded" not in st.session_state:
     )
     st.session_state["analytics_loaded"] = True
 
-# Inject the tracking code into the page head using components
-#import streamlit.components.v1 as components
-# components.html(ga_script, height=0, width=0)
-
 # --- Custom Styling ---
 st.markdown(
     """
