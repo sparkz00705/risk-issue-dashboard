@@ -285,9 +285,25 @@ if generate_clicked:
 
 # If the report has been generated, render the HTML download link dynamically beside the control (without displaying text on screen)
 if st.session_state["ai_report_text"]:
-    # Format the Markdown report output into clean HTML first
+    # Properly format the Markdown content into clean HTML paragraphs and line breaks
     body_content = st.session_state["ai_report_text"]
-    body_content = body_content.replace('## ', '<h2>').replace('### ', '<h3>').replace('\n- ', '<br>• ')
+    
+    # Replace markdown headings and list items, and convert double/single newlines to actual HTML paragraph blocks
+    body_content = body_content.replace('## ', '<h2>').replace('### ', '<h3>')
+    
+    # Convert bullet points and clean up paragraph spacing
+    lines = body_content.split('\n')
+    formatted_lines = []
+    for line in lines:
+        line = line.strip()
+        if line.startswith('<h2>') or line.startswith('<h3>'):
+            formatted_lines.append(line)
+        elif line.startswith('- ') or line.startswith('* '):
+            formatted_lines.append(f"<li>{line[2:]}</li>")
+        elif line:
+            formatted_lines.append(f"<p>{line}</p>")
+            
+    body_content = "".join(formatted_lines)
     
     # Apply dynamic font colors to the RAG status text explicitly inside the HTML
     body_content = body_content.replace('RED', '<span style="color: #dc2626; font-weight: bold; font-size: 1.2em;">RED</span>')
@@ -301,10 +317,10 @@ if st.session_state["ai_report_text"]:
     <title>Executive Project Status Report</title>
     <style>
         body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 40px auto; padding: 20px; background: #fdfdfd; }}
-        h2 {{ color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }}
+        h2 {{ color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px; }}
         h3 {{ color: #334155; margin-top: 24px; }}
-        ul {{ margin-bottom: 20px; }}
-        li {{ margin-bottom: 6px; }}
+        p {{ margin-bottom: 12px; }}
+        li {{ margin-bottom: 6px; margin-left: 20px; }}
     </style>
 </head>
 <body>
