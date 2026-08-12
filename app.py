@@ -276,7 +276,7 @@ if generate_clicked:
             """
             
             response = client.models.generate_content(
-                model="gemini-2.5-flash", contents=prompt
+                model="gemini-3.6-flash", contents=prompt
             )
             st.session_state["ai_report_text"] = response.text
             st.success("Real-time AI analysis complete! Download your report below.")
