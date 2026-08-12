@@ -12,7 +12,7 @@ st.set_page_config(
 
 # --- GOOGLE ANALYTICS INTEGRATION ---
 ga_script = """
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
