@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 from google import genai
 import streamlit as st
+import streamlit.components.v1 as components
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
@@ -9,6 +10,24 @@ st.set_page_config(
     layout="wide",
     page_icon="🛡️",
 )
+
+# --- GOOGLE ANALYTICS (GA4) ---
+GA_MEASUREMENT_ID = "G-60MBXMF62S"
+ 
+components.html(
+    f"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', '{GA_MEASUREMENT_ID}');
+    </script>
+    """,
+    height=0,
+    width=0,
+)
+
 # --- Custom Styling ---
 st.markdown(
     """
