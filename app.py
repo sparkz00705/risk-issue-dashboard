@@ -384,7 +384,7 @@ if submit_scoring and new_risk_desc:
             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
             prompt = f"""
             Analyze the following project risk description and assign a structured risk evaluation:
-            Risk Title: {new_risk_title}
+            # Risk Title: {new_risk_title}
             Description: {new_risk_desc}
             
             Provide your response strictly in this format:
