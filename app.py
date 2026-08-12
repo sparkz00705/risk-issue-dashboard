@@ -38,7 +38,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("🛡️ Intelligent Risk Management powered by real-time data")
+st.title("🛡️ Intelligent Risk Management powered by real time data")
 st.markdown(
     "From potential risk to absolute resolution: Real-time project intelligence"
    # "A professional portfolio project tracking future uncertainties"
