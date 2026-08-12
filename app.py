@@ -233,9 +233,9 @@ st.markdown(
 project_update = st.text_area(
     "Project Notes / Status Update:",
     placeholder=(
-        "Type or paste any raw meeting notes here... (e.g., 'We noticed memory"
-        " leaks in the database server, and the QA team is blocked because"
-        " staging credentials expired.')"
+       # "Type or paste any raw meeting notes here... (e.g., 'We noticed memory"
+       # " leaks in the database server, and the QA team is blocked because"
+       # " staging credentials expired.')"
     ),
 )
 
