@@ -249,7 +249,7 @@ if st.button("Extract Risks & Issues with Live AI", type="primary"):
                 issue_summary = data_issues.to_string(index=False)
                 
                 prompt = f"""
-                You are a senior risk management expert. Analyze the current project data and the new status update below.
+                You are a senior project portfolio director. Analyze the project data and user request below.
                 
                 CURRENT ACTIVE RISK REGISTER:
                 {risk_summary}
@@ -257,18 +257,20 @@ if st.button("Extract Risks & Issues with Live AI", type="primary"):
                 CURRENT ACTIVE ISSUE LOG:
                 {issue_summary}
                 
-                NEW PROJECT NOTES / STATUS UPDATE:
+                USER REQUEST / NOTES:
                 {project_update}
                 
                 Task:
-                1. Review the new status update against the existing Risk Register and Issue Log.
-                2. Predict or identify any new potential future Risk.
-                3. Identify any current active Issue or escalation.
+                1. Determine and state the Project RAG Status (RED, AMBER, or GREEN) with clear executive justification.
+                2. Identify Discovered Risks and Active Issues.
+                3. Provide concrete, step-by-step recommendations on how to remediate these blocks and turn the project status to Green.
                 
-                Format your response clearly with headings:
+                Format your response with these exact markdown headers:
+                ## Project RAG Status: [RED/AMBER/GREEN]
+                ### Executive Summary Justification
                 ### Discovered Risk
                 ### Discovered Issue
-                ### AI Predictive Insights (Based on current register data)
+                ### Action Plan to Turn Status Green
                 """
                 
                 response = client.models.generate_content(
