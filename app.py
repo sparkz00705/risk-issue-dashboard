@@ -246,19 +246,31 @@ if st.button("Extract Risks & Issues with Live AI", type="primary"):
         # Initialize Gemini client using Streamlit secrets
         client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
-        prompt = f"""
-                Analyze the following project update text. Extract clearly:
-                1. A potential future Risk (uncertainty).
-                2. A current active Issue (realized roadblock).
-
+          # Convert active risk and issue tables into text context for the model
+                risk_summary = data_risks.to_string(index=False)
+                issue_summary = data_issues.to_string(index=False)
+       
+          prompt = f"""
+          
+           You are a senior risk management expert. Analyze the current project data and the new status update below.
+              CURRENT ACTIVE RISK REGISTER:
+                {risk_summary}
+                
+                CURRENT ACTIVE ISSUE LOG:
+                {issue_summary}
+                
+                NEW PROJECT NOTES / STATUS UPDATE:
+                {project_update}
+                
+                Task:
+                1. Review the new status update against the existing Risk Register and Issue Log.
+                2. Predict or identify any new potential future Risk.
+                3. Identify any current active Issue or escalation.
+                
                 Format your response clearly with headings:
                 ### Discovered Risk
-                (Extracted risk statement)
                 ### Discovered Issue
-                (Extracted issue statement)
-
-                Text to analyze:
-                {project_update}
+                ### AI Predictive Insights (Based on current register data)
                 """
 
         response = client.models.generate_content(
