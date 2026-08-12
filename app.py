@@ -40,7 +40,7 @@ st.markdown(
 
 st.title("🛡️ AI-Powered Risk vs. Issue Dashboard")
 st.markdown(
-    "A professional-grade portfolio project tracking future uncertainties"
+    "A professional portfolio project tracking future uncertainties"
     " (Risks) versus active operational roadblocks (Issues) with real-time AI"
     " text parsing."
 )
@@ -262,7 +262,7 @@ if st.button("Extract Risks & Issues with Live AI", type="primary"):
                 """
 
         response = client.models.generate_content(
-            model="gemini-1.5-flash", contents=prompt
+            model="gemini-1.5-flash-latest", contents=prompt
         )
 
         st.success("Real-time AI analysis complete!")
