@@ -382,7 +382,7 @@ st.subheader("🎯 AI-Driven Automated Risk Scoring Assistant")
 st.markdown("Describe a potential project risk in plain text below, and let the AI analyze it to predict its Probability, Impact, and Risk Score.")
 
 with st.form("risk_scoring_form"):
-    new_risk_title = st.text_input("Risk Title / Short Name", placeholder="e.g., Third-party API rate limit bottlenecks")
+    # new_risk_title = st.text_input("Risk Title / Short Name", placeholder="e.g., Third-party API rate limit bottlenecks")
     new_risk_desc = st.text_area("Detailed Risk Description", placeholder="Describe what could happen, the triggers, and potential consequences...")
     submit_scoring = st.form_submit_button("Analyze & Score Risk with AI", type="secondary")
 
