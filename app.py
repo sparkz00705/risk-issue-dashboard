@@ -323,22 +323,35 @@ with c2:
 
 st.markdown("---")
 
-# --- SECTION 3: INTERACTIVE REGISTERS ---
-st.subheader("📋 Core Records & Logs")
-tab1, tab2 = st.tabs(["Active Risk Register", "Active Issue Log"])
+# --- SECTION 3: INTERACTIVE REGISTERS & DEFINITIONS ---
+st.subheader("📋 Core Records & Status Definitions")
+tab1, tab2, tab3 = st.tabs(["Active Risk Register", "Active Issue Log", "Status & Definitions Reference"])
 
 with tab1:
-  st.markdown("### Risk Register Explanation")
-  st.markdown(
-      "Risks are future uncertain events that *might* happen. The **Score** is"
-      " quantified using the matrix formula: **Score = Probability × Impact**."
-  )
-  st.dataframe(data_risks, use_container_width=True)
+    st.markdown("### Risk Register")
+    st.markdown("Risks are **future uncertain events** that *might* happen. The **Score** is quantified using the matrix formula: **Score = Probability × Impact**.")
+    st.dataframe(data_risks, use_container_width=True)
 
 with tab2:
-  st.markdown("### Issue Log Explanation")
-  st.markdown(
-      "Issues are current realized problems that require immediate operational"
-      " remediation. Many issues originate directly from materialized risks."
-  )
-  st.dataframe(data_issues, use_container_width=True)
+    st.markdown("### Issue Log")
+    st.markdown("Issues are **current realized problems** that require immediate operational remediation. Many issues originate directly from materialized risks.")
+    st.dataframe(data_issues, use_container_width=True)
+
+with tab3:
+    st.markdown("### Project RAG Status & Key Definitions Guide")
+    st.markdown("""
+    * **Project RAG Status:** 
+      * **RED:** Critical blockers or materialized risks are impacting core delivery, requiring immediate executive intervention.
+      * **AMBER:** Moderate risks or minor bottlenecks are present, needing close oversight.
+      * **GREEN:** Project is tracking smoothly against baseline targets.
+      
+    * **Risk Status Definitions:**
+      * **Open:** The future uncertainty is active and monitored, but has not occurred yet.
+      * **Mitigated:** Preventive actions have been successfully applied to reduce its probability or impact.
+      * **Materialized:** The risk has officially occurred and turned into a real, active problem.
+
+    * **Issue Status Definitions:**
+      * **Open:** The problem has been logged, but active remediation has not started.
+      * **In Progress:** The team is actively working on an emergency fix or remediation plan.
+      * **Resolved:** The problem has been successfully fixed, tested, and closed out.
+    """)
