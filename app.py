@@ -377,6 +377,40 @@ with c2:
 
 st.markdown("---")
 
+# --- AI-DRIVEN AUTOMATED RISK SCORING TOOL ---
+st.subheader("🎯 AI-Driven Automated Risk Scoring Assistant")
+st.markdown("Describe a potential project risk in plain text below, and let the AI analyze it to predict its Probability, Impact, and Risk Score.")
+
+with st.form("risk_scoring_form"):
+    new_risk_title = st.text_input("Risk Title / Short Name", placeholder="e.g., Third-party API rate limit bottlenecks")
+    new_risk_desc = st.text_area("Detailed Risk Description", placeholder="Describe what could happen, the triggers, and potential consequences...")
+    submit_scoring = st.form_submit_button("Analyze & Score Risk with AI", type="secondary")
+
+if submit_scoring and new_risk_desc:
+    with st.spinner("AI is analyzing risk probability and impact..."):
+        try:
+            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+            prompt = f"""
+            Analyze the following project risk description and assign a structured risk evaluation:
+            Risk Title: {new_risk_title}
+            Description: {new_risk_desc}
+            
+            Provide your response strictly in this format:
+            - **Probability:** [Low / Medium / High]
+            - **Impact:** [Low / Medium / High / Critical]
+            - **Calculated Score:** [Number, where Low=1, Medium=2, High=3, Critical=5. Score = Probability Weight × Impact Weight]
+            - **Justification & Mitigation Advice:** [Short strategic reasoning and preventive advice]
+            """
+            response = client.models.generate_content(
+                model="gemini-3.6-flash", contents=prompt
+            )
+            st.success("Risk analysis complete!")
+            st.markdown(response.text)
+        except Exception as e:
+            st.error(f"API Error: {e}")
+
+st.markdown("---")
+
 # --- SECTION 3: INTERACTIVE REGISTERS & DEFINITIONS ---
 st.subheader("📋 Core Records & Status Definitions")
 tab1, tab2, tab3 = st.tabs(["Active Risk Register", "Active Issue Log", "Status & Definitions Reference"])
