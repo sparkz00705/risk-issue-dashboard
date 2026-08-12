@@ -10,6 +10,20 @@ st.set_page_config(
     page_icon="🛡️",
 )
 
+# --- Google Analytics / Tag Integration ---
+st.markdown(
+    """
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-60MBXMF62S');
+    </script>
+    """,
+    unsafe_allow_html=True
+)
 # --- Custom Styling ---
 st.markdown(
     """
@@ -306,24 +320,6 @@ if st.session_state["ai_report_text"]:
     report_html = f"""<!DOCTYPE html>
 <html>
 <head>
-# --- GOOGLE ANALYTICS INTEGRATION ---
-st.markdown(
-    """
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-60MBXMF62S');
-    </script>
-    """,
-    unsafe_allow_html=True
-)
-"""
-# Inject the tracking code into the page head using components
-import streamlit.components.v1 as components
-components.html(ga_script, height=0, width=0)
     <meta charset="utf-8">
     <title>Executive Project Status Report</title>
     <style>
