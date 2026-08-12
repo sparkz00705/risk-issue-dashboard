@@ -10,22 +10,27 @@ st.set_page_config(
     page_icon="🛡️",
 )
 
-# --- GOOGLE ANALYTICS INTEGRATION ---
-ga_script = """
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-60MBXMF62S');
-</script>
-"""
+# --- Google Analytics Tag (Injected only once using Session State) ---
+if "analytics_loaded" not in st.session_state:
+    st.markdown(
+        """
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-52GRQSL"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-52GRQSL');
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+    st.session_state["analytics_loaded"] = True
 
 # Inject the tracking code into the page head using components
-import streamlit.components.v1 as components
-components.html(ga_script, height=0, width=0)
+#import streamlit.components.v1 as components
+# components.html(ga_script, height=0, width=0)
+
 # --- Custom Styling ---
 st.markdown(
     """
