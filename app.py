@@ -237,7 +237,7 @@ if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="prima
             issue_summary = data_issues.to_string(index=False)
             
             prompt = f"""
-            You are a senior project portfolio director. Analyze the project registers below.
+            You are a senior project portfolio director. Analyze the project registers below and fill out the standardized Project Status Report template.
             
             CURRENT ACTIVE RISK REGISTER:
             {risk_summary}
@@ -246,23 +246,35 @@ if st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="prima
             {issue_summary}
             
             Task:
-            1. Determine and state the Project RAG Status (RED, AMBER, or GREEN) with clear executive justification.
-            2. Identify any materialized risks and active issues.
-            3. Provide concrete, step-by-step recommendations on how to remediate blocks and turn the project status to Green.
+            Generate a complete executive project status report following this exact template structure:
             
-            Format your response with these exact markdown headers:
-            ## Project RAG Status: [RED/AMBER/GREEN]
-            ### Executive Summary Justification
-            ### Discovered Risk / Materialized Risks
-            ### Active Issues
-            ### Action Plan to Turn Status Green
+            ## 📊 Executive Project Status Report
+            - **Overall Project RAG Status:** [RED / AMBER / GREEN]
+            - **Reporting Period:** Current Active Sprint / Real-Time Analysis
+            
+            ### 1. Executive Summary & RAG Justification
+            [Provide a concise overview explaining why this RAG status was assigned based on current open risks and issues]
+            
+            ### 2. Key Highlights & Progress
+            [Summarize current operational wins or milestones achieved]
+            
+            ### 3. Materialized Risks & Active Roadblocks (Issues)
+            [Highlight critical active items, blockers, and materialized risks impacting delivery]
+            
+            ### 4. Corrective Action Plan (Turning Status to Green)
+            [Provide concrete, prioritized, step-by-step remediation steps]
             """
             
             response = client.models.generate_content(
-                model="gemini-2.5-flash", contents=prompt
+                model="gemini-3.6-flash", contents=prompt
             )
             st.success("Real-time AI analysis complete!")
+            
+            # Display inside a clean container mimicking a status report document
+            st.markdown("---")
             st.markdown(response.text)
+            st.markdown("---")
+            
         except Exception as e:
             st.error(f"API Error: {e}")
             
