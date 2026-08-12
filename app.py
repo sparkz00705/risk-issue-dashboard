@@ -11,6 +11,7 @@ st.set_page_config(
 )
 
 # --- GOOGLE ANALYTICS INTEGRATION ---
+ga_script = """
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-60MBXMF62S"></script>
 <script>
@@ -21,7 +22,6 @@ st.set_page_config(
   gtag('config', 'G-60MBXMF62S');
 </script>
 """
-
 # Inject the tracking code into the page head using components
 import streamlit.components.v1 as components
 components.html(ga_script, height=0, width=0)
