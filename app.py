@@ -3,6 +3,14 @@ import plotly.express as px
 from groq import Groq
 import streamlit as st
 import streamlit.components.v1 as components
+import streamlit_gtag as st_gtag
+
+
+# --- 1. PLACE GOOGLE ANALYTICS CODE RIGHT HERE ---
+st_gtag(
+    gtag_id="G-60MBXMF62S",
+    config={"send_page_view": True}
+)
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
