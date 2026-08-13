@@ -22,13 +22,13 @@ if "ga_injected" not in st.session_state:
             var s1 = doc.createElement('script');
             s1.id = 'ga-gtag-script';
             s1.async = true;
-            s1.src = "https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}";
+            s1.src = "https://www.googletagmanager.com/gtag/js?id={G-60MBXMF62S}";
             doc.head.appendChild(s1);
 
             window.parent.dataLayer = window.parent.dataLayer || [];
             function gtag(){{ window.parent.dataLayer.push(arguments); }}
             gtag('js', new Date());
-            gtag('config', '{GA_MEASUREMENT_ID}', {{ 'debug_mode': true }});
+            gtag('config', '{G-60MBXMF62S}', {{ 'debug_mode': true }});
             window.parent.gtag = gtag;
         }})();
         </script>
