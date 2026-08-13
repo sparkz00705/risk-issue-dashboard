@@ -11,15 +11,13 @@ st.set_page_config(
     page_icon="🛡️",
 )
 
-# --- GOOGLE ANALYTICS (GA4) ---
-GA_MEASUREMENT_ID = "G-60MBXMF62S"
 if "ga_injected" not in st.session_state:
     components.html(
         f"""
         <script>
         (function() {{
             var doc = window.parent.document;
-            if (doc.getElementById('ga-gtag-script')) return;  // already present, bail
+            if (doc.getElementById('ga-gtag-script')) return;
 
             var s1 = doc.createElement('script');
             s1.id = 'ga-gtag-script';
@@ -30,7 +28,7 @@ if "ga_injected" not in st.session_state:
             window.parent.dataLayer = window.parent.dataLayer || [];
             function gtag(){{ window.parent.dataLayer.push(arguments); }}
             gtag('js', new Date());
-            gtag('config', '{GA_MEASUREMENT_ID}');
+            gtag('config', '{GA_MEASUREMENT_ID}', {{ 'debug_mode': true }});
             window.parent.gtag = gtag;
         }})();
         </script>
