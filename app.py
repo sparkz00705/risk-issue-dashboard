@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.express as px
-from google import genai
+from groq import Groq
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -64,9 +64,6 @@ st.markdown(
 st.title("🛡️ Intelligent Risk Management powered by real time data")
 st.markdown(
     "From potential risk to absolute resolution: Real-time project intelligence"
-   # "A professional portfolio project tracking future uncertainties"
-   # " (Risks) versus active operational roadblocks (Issues) with real-time AI"
-   # " text parsing."
 )
 
 # --- DATA UPLOAD, TEMPLATE DOWNLOADS & SPECIFICATIONS ---
@@ -247,24 +244,22 @@ col4.metric(label="Risk-to-Issue Conversion Rate", value="20%")
 
 st.markdown("---")
 
-# --- REAL-TIME GENAI PARSER SECTION ---
+# --- REAL-TIME GROQ AI PARSER SECTION ---
 st.subheader("🤖 Project Status Update")
 st.markdown("Click the button below to have the real-time AI evaluate your current Risk Register and Issue Log, generate the RAG status report as a standalone HTML file.")
 
-# Place the button and download button side by side using columns
 col_gen1, col_gen2 = st.columns([2, 2])
 
 with col_gen1:
     generate_clicked = st.button("Generate AI Project RAG Report & Risk/Issue Analysis", type="primary")
 
-# Initialize session state for the report if it doesn't exist
 if "ai_report_text" not in st.session_state:
     st.session_state["ai_report_text"] = None
 
 if generate_clicked:
-    with st.spinner("Querying real-time AI model..."):
+    with st.spinner("Querying real-time Groq AI model..."):
         try:
-            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             
             risk_summary = data_risks.to_string(index=False)
             issue_summary = data_issues.to_string(index=False)
@@ -298,23 +293,22 @@ if generate_clicked:
             [Provide concrete, prioritized, step-by-step remediation steps]
             """
             
-            response = client.models.generate_content(
-                model="gemini-3.6-flash", contents=prompt
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are an expert senior project portfolio director."},
+                    {"role": "user", "content": prompt}
+                ]
             )
-            st.session_state["ai_report_text"] = response.text
+            st.session_state["ai_report_text"] = response.choices[0].message.content
             st.success("Real-time AI analysis complete! Download your report below.")
         except Exception as e:
             st.error(f"API Error: {e}")
 
-# If the report has been generated, render the HTML download link dynamically beside the control (without displaying text on screen)
 if st.session_state["ai_report_text"]:
-    # Properly format the Markdown content into clean HTML paragraphs and line breaks
     body_content = st.session_state["ai_report_text"]
-    
-    # Replace markdown headings and list items, and convert double/single newlines to actual HTML paragraph blocks
     body_content = body_content.replace('## ', '<h2>').replace('### ', '<h3>')
     
-    # Convert bullet points and clean up paragraph spacing
     lines = body_content.split('\n')
     formatted_lines = []
     for line in lines:
@@ -328,7 +322,6 @@ if st.session_state["ai_report_text"]:
             
     body_content = "".join(formatted_lines)
     
-    # Apply dynamic font colors to the RAG status text explicitly inside the HTML
     body_content = body_content.replace('RED', '<span style="color: #dc2626; font-weight: bold; font-size: 1.2em;">RED</span>')
     body_content = body_content.replace('AMBER', '<span style="color: #d97706; font-weight: bold; font-size: 1.2em;">AMBER</span>')
     body_content = body_content.replace('GREEN', '<span style="color: #16a34a; font-weight: bold; font-size: 1.2em;">GREEN</span>')
@@ -405,17 +398,15 @@ st.subheader("🎯 AI-Driven Automated Risk Scoring Assistant")
 st.markdown("Describe a potential project risk in plain text below, and let the AI analyze it to predict its Probability, Impact, and Risk Score.")
 
 with st.form("risk_scoring_form"):
-    # new_risk_title = st.text_input("Risk Title / Short Name", placeholder="e.g., Third-party API rate limit bottlenecks")
     new_risk_desc = st.text_area("Detailed Risk Description", placeholder="Describe what could happen, the triggers, and potential consequences...")
     submit_scoring = st.form_submit_button("Analyze & Score Risk with AI", type="secondary")
 
 if submit_scoring and new_risk_desc:
     with st.spinner("AI is analyzing risk probability and impact..."):
         try:
-            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             prompt = f"""
             Analyze the following project risk description and assign a structured risk evaluation:
-            # Risk Title: {new_risk_title}
             Description: {new_risk_desc}
             
             Provide your response strictly in this format:
@@ -424,11 +415,15 @@ if submit_scoring and new_risk_desc:
             - **Calculated Score:** [Number, where Low=1, Medium=2, High=3, Critical=5. Score = Probability Weight × Impact Weight]
             - **Justification & Mitigation Advice:** [Short strategic reasoning and preventive advice]
             """
-            response = client.models.generate_content(
-                model="gemini-3.6-flash", contents=prompt
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are an expert risk management consultant."},
+                    {"role": "user", "content": prompt}
+                ]
             )
             st.success("Risk analysis complete!")
-            st.markdown(response.text)
+            st.markdown(response.choices[0].message.content)
         except Exception as e:
             st.error(f"API Error: {e}")
 
