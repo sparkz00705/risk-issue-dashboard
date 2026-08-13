@@ -4,24 +4,6 @@ from groq import Groq
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Inject Google Analytics tracking code with parent-window tracking
-ga_id = "G-60MBXMF62S"
-ga_script = f"""
-<script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){{dataLayer.push(arguments);}}
-    gtag('js', new Date());
-    
-    // Configure tracking for the parent/top application window
-    gtag('config', '{ga_id}', {{
-        'page_location': window.parent.location.href,
-        'page_title': window.parent.document.title
-    }});
-</script>
-"""
-components.html(ga_script, height=0, width=0)
-
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
     page_title="Intelligent Risk Management",
