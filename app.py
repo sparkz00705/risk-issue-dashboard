@@ -13,20 +13,32 @@ st.set_page_config(
 
 # --- GOOGLE ANALYTICS (GA4) ---
 GA_MEASUREMENT_ID = "G-60MBXMF62S"
- 
-components.html(
-    f"""
-    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-      gtag('config', '{GA_MEASUREMENT_ID}');
-    </script>
-    """,
-    height=0,
-    width=0,
-)
+if "ga_injected" not in st.session_state:
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            var doc = window.parent.document;
+            if (doc.getElementById('ga-gtag-script')) return;  // already present, bail
+
+            var s1 = doc.createElement('script');
+            s1.id = 'ga-gtag-script';
+            s1.async = true;
+            s1.src = "https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}";
+            doc.head.appendChild(s1);
+
+            window.parent.dataLayer = window.parent.dataLayer || [];
+            function gtag(){{ window.parent.dataLayer.push(arguments); }}
+            gtag('js', new Date());
+            gtag('config', '{GA_MEASUREMENT_ID}');
+            window.parent.gtag = gtag;
+        }})();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
+    st.session_state["ga_injected"] = True
 
 # --- Custom Styling ---
 st.markdown(
