@@ -19,7 +19,7 @@ def get_visitor_count():
     pass
   return "Live"
 visitor_count = get_visitor_count()
-st.markdown(f"**Total Visitors:** {visitor_count}"))
+st.markdown(f"**Total Visitors:** {visitor_count}")
 
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
