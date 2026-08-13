@@ -6,15 +6,9 @@ import streamlit.components.v1 as components
 import requests
 import streamlit as st
 
-# --- SIDEBAR VISITOR COUNTER ---
-st.sidebar.markdown("---")
-st.sidebar.subheader("📊 App Statistics")
-
-
-@st.cache_data(ttl=60)  # Cache the count for 60 seconds to prevent rate limits
+@st.cache_data(ttl=60)
 def get_visitor_count():
   try:
-    # Using CounterAPI as a free, lightweight tracking endpoint
     response = requests.get(
         "https://api.counterapi.dev/v1/risk-issue-dashboard/visits/up",
         timeout=2,
@@ -24,9 +18,9 @@ def get_visitor_count():
   except Exception:
     pass
   return "Live"
-
 visitor_count = get_visitor_count()
-st.sidebar.markdown(f"**Total Visitors:** {visitor_count}")
+st.markdown(f"**Total Visitors:** {visitor_count}"))
+
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
