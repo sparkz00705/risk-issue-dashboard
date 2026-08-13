@@ -6,36 +6,12 @@ import streamlit.components.v1 as components
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
-    page_title="AI-Powered Risk vs. Issue Dashboard",
+    page_title="Intelligent Risk Management",
     layout="wide",
     page_icon="🛡️",
 )
 
-# --- SILENT PERSISTENT VISITOR COUNTER ---
-import os
 
-counter_file = "visitor_count.txt"
-
-if "counted_session" not in st.session_state:
-    st.session_state["counted_session"] = True
-    
-    if os.path.exists(counter_file):
-        try:
-            with open(counter_file, "r") as f:
-                current_count = int(f.read().strip())
-        except Exception:
-            current_count = 0
-    else:
-        current_count = 0
-        
-    new_count = current_count + 1
-    
-    try:
-        with open(counter_file, "w") as f:
-            f.write(str(new_count))
-    except Exception:
-        pass
- 
 # --- Custom Styling ---
 st.markdown(
     """
