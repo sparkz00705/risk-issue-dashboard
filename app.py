@@ -9,15 +9,17 @@ import streamlit as st
 @st.cache_data(ttl=60)
 def get_visitor_count():
   try:
+    # Using countapi.xyz which initializes and increments cleanly
     response = requests.get(
-        "https://api.counterapi.dev/v1/risk-issue-dashboard/visits/up",
+        "https://api.countapi.xyz/hit/risk-issue-dashboard-sparkz/visits",
         timeout=2,
     )
     if response.status_code == 200:
-      return response.json().get("count", "N/A")
+      return response.json().get("value", "Live")
   except Exception:
     pass
   return "Live"
+
 visitor_count = get_visitor_count()
 st.markdown(f"**Total Visitors:** {visitor_count}")
 
