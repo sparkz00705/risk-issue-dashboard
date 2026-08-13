@@ -26,7 +26,7 @@ def get_visitor_count():
   return "Live"
 
 visitor_count = get_visitor_count()
-st.sidebar.metric(label="Total Visitors", value=visitor_count)
+st.sidebar.markdown(f"**Total Visitors:** {visitor_count}")
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
