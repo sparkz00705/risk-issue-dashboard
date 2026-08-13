@@ -11,35 +11,31 @@ st.set_page_config(
     page_icon="🛡️",
 )
 
-# --- GOOGLE ANALYTICS (GA4) ---
-GA_MEASUREMENT_ID = "G-60MBXMF62S"
- 
-if "ga_injected" not in st.session_state:
-    components.html(
-        f"""
-        <script>
-        (function() {{
-            var doc = window.parent.document;
-            if (doc.getElementById('ga-gtag-script')) return;
-            var s1 = doc.createElement('script');
-            s1.id = 'ga-gtag-script';
-            s1.async = true;
-            s1.src = "https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}";
-            doc.head.appendChild(s1);
-            window.parent.dataLayer = window.parent.dataLayer || [];
-            function gtag(){{ window.parent.dataLayer.push(arguments); }}
-            gtag('js', new Date());
-            gtag('config', '{GA_MEASUREMENT_ID}', {{ 'debug_mode': true }});
-            window.parent.gtag = gtag;
-        }})();
-        </script>
-        """,
-        height=0,
-        width=0,
-    )
-    st.session_state["ga_injected"] = True
- 
+# --- SILENT PERSISTENT VISITOR COUNTER ---
+import os
 
+counter_file = "visitor_count.txt"
+
+if "counted_session" not in st.session_state:
+    st.session_state["counted_session"] = True
+    
+    if os.path.exists(counter_file):
+        try:
+            with open(counter_file, "r") as f:
+                current_count = int(f.read().strip())
+        except Exception:
+            current_count = 0
+    else:
+        current_count = 0
+        
+    new_count = current_count + 1
+    
+    try:
+        with open(counter_file, "w") as f:
+            f.write(str(new_count))
+    except Exception:
+        pass
+ 
 # --- Custom Styling ---
 st.markdown(
     """
