@@ -14,23 +14,6 @@ st.set_page_config(
 )
 
 
-# --- 2. VISITOR COUNTER FUNCTION ---
-@st.cache_data(ttl=60)
-def get_visitor_count():
-  try:
-    response = requests.get(
-        "https://api.countapi.xyz/hit/risk-issue-dashboard-sparkz/visits",
-        timeout=2,
-    )
-    if response.status_code == 200:
-      return response.json().get("value", "Live")
-  except Exception:
-    pass
-  return "Live"
-visitor_count = get_visitor_count()
-st.markdown(f"**Total Visitors:** {visitor_count}")
-
-
 # --- Custom Styling ---
 st.markdown(
     """
