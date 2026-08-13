@@ -6,10 +6,18 @@ import streamlit.components.v1 as components
 import requests
 import streamlit as st
 
+# --- PAGE CONFIGURATION & LUXURY STYLING ---
+st.set_page_config(
+    page_title="Intelligent Risk Management",
+    layout="wide",
+    page_icon="🛡️",
+)
+
+
+# --- 2. VISITOR COUNTER FUNCTION ---
 @st.cache_data(ttl=60)
 def get_visitor_count():
   try:
-    # Using countapi.xyz which initializes and increments cleanly
     response = requests.get(
         "https://api.countapi.xyz/hit/risk-issue-dashboard-sparkz/visits",
         timeout=2,
@@ -19,17 +27,8 @@ def get_visitor_count():
   except Exception:
     pass
   return "Live"
-
 visitor_count = get_visitor_count()
-st.markdown(f"**Total Visitors:** {visitor_count}")
 
-
-# --- PAGE CONFIGURATION & LUXURY STYLING ---
-st.set_page_config(
-    page_title="Intelligent Risk Management",
-    layout="wide",
-    page_icon="🛡️",
-)
 
 
 # --- Custom Styling ---
