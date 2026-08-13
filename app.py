@@ -3,6 +3,30 @@ import plotly.express as px
 from groq import Groq
 import streamlit as st
 import streamlit.components.v1 as components
+import requests
+import streamlit as st
+
+# --- SIDEBAR VISITOR COUNTER ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("📊 App Statistics")
+
+
+@st.cache_data(ttl=60)  # Cache the count for 60 seconds to prevent rate limits
+def get_visitor_count():
+  try:
+    # Using CounterAPI as a free, lightweight tracking endpoint
+    response = requests.get(
+        "https://api.counterapi.dev/v1/risk-issue-dashboard/visits/up",
+        timeout=2,
+    )
+    if response.status_code == 200:
+      return response.json().get("count", "N/A")
+  except Exception:
+    pass
+  return "Live"
+
+visitor_count = get_visitor_count()
+st.sidebar.metric(label="Total Visitors", value=visitor_count)
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
