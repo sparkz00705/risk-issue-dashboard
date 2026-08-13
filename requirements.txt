@@ -4,3 +4,4 @@ plotly
 google-genai
 openpyxl
 groq
+streamlit_gtag
