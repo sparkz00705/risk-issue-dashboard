@@ -3,7 +3,7 @@ name: Wake Up Streamlit App
 on:
   schedule:
     # Runs every 1 hours (adjust the cron expression if you prefer a different frequency)
-    - cron: '0 */4 * * *'
+    - cron: '0 */1 * * *'
   workflow_dispatch: # Allows you to manually trigger the workflow from GitHub
 
 jobs:
