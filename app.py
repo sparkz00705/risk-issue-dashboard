@@ -8,7 +8,7 @@ st.set_page_config(
     page_icon="🛡️",
 )
 
-# --- INITIALIZE SHARED SESSION STATE ---
+# --- INITIALIZE SHARED SESSION STATE (DATA SYNC) ---
 if "data_risks" not in st.session_state:
     st.session_state["data_risks"] = pd.DataFrame({
         "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
@@ -24,6 +24,8 @@ if "data_risks" not in st.session_state:
         "Impact": ["Critical", "High", "Medium", "High", "Critical"],
         "Score": [15, 9, 4, 12, 10],
         "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+        "Financial_Impact_USD": [50000, 30000, 15000, 40000, 60000],
+        "Schedule_Delay_Days": [14, 21, 7, 30, 14],
     })
 
 if "data_issues" not in st.session_state:
@@ -55,7 +57,17 @@ if "data_rtm" not in st.session_state:
         "Verification_Method": ["Automated Test", "Load Test", "Manual Review", "Chaos Test"],
     })
 
-# Define multi-page navigation router
+if "data_schedule" not in st.session_state:
+    st.session_state["data_schedule"] = pd.DataFrame({
+        "Task_ID": ["TSK-101", "TSK-102", "TSK-103", "TSK-104"],
+        "Task_Name": ["API Architecture Finalization", "Database Sharding & Migration", "Third-Party Payment Integration", "Security Penetration Testing"],
+        "Owner": ["Lead Architect", "DBA Team", "External Vendor", "Security Consultant"],
+        "Duration_Days": [10, 25, 14, 7],
+        "Dependencies": ["None", "TSK-101", "TSK-101", "TSK-102, TSK-103"],
+        "Is_Critical_Path": [True, True, False, True],
+    })
+
+# --- NAVIGATION PAGES SETUP ---
 dashboard_page = st.Page(
     page="pages/1_Dashboard.py", 
     title="Intelligent Risk Management", 
@@ -64,10 +76,16 @@ dashboard_page = st.Page(
 )
 
 rtm_page = st.Page(
-    page="pages/rtm_page.py", 
+    page="pages/2_Requirements_Traceability_Matrix.py", 
     title="Requirements Traceability Matrix", 
     icon="🔗"
 )
 
-pg = st.navigation([dashboard_page, rtm_page])
+schedule_page = st.Page(
+    page="pages/3_Schedule_Risk_Analyzer.py",
+    title="Schedule Risk Analyzer",
+    icon="📅"
+)
+
+pg = st.navigation([dashboard_page, rtm_page, schedule_page])
 pg.run()
