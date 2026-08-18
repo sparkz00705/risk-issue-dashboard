@@ -5,6 +5,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import requests
 import streamlit as st
+from rtm_section import render_requirements_traceability_section
 
 # --- PAGE CONFIGURATION & LUXURY STYLING ---
 st.set_page_config(
@@ -158,6 +159,8 @@ with upload_tab1:
         "Score": [15, 9, 4, 12, 10],
         "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
     })
+
+
 
 with upload_tab2:
   uploaded_issue_file = st.file_uploader(
@@ -402,6 +405,10 @@ if submit_scoring and new_risk_desc:
             st.error(f"API Error: {e}")
 
 st.markdown("---")
+
+
+render_requirements_traceability_section(data_risks)
+
 
 # --- SECTION 3: INTERACTIVE REGISTERS & DEFINITIONS ---
 st.subheader("📋 Core Records & Status Definitions")
