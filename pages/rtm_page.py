@@ -45,7 +45,7 @@ def _load_requirements_register() -> pd.DataFrame:
 
     col_dl, col_up = st.columns([1, 2])
 
-       with col_dl:
+    with col_dl:
         req_csv = req_template.to_csv(index=False).encode("utf-8")
         st.download_button(
             "📥 Download Requirements Template",
@@ -54,12 +54,10 @@ def _load_requirements_register() -> pd.DataFrame:
             mime="text/csv",
             key="rtm_req_template_dl",
         )
-     with col_up:
+    with col_up:
         uploaded_req_file = st.file_uploader(
             "Upload filled-in Requirements CSV/Excel:", type=["csv", "xlsx"], key="rtm_req_up"
         )
-          
-  
 
     if uploaded_req_file is not None:
         try:
@@ -351,7 +349,7 @@ def render_requirements_traceability_section():
         "📥 Download RTM Links (CSV)",
         data=st.session_state["rtm_links"].to_csv(index=False).encode("utf-8"),
         file_name="rtm_links.csv",
-        mime="text/css",
+        mime="text/csv",
         key="rtm_links_dl",
     )
     reload_file = st.file_uploader("Reload previously saved RTM Links CSV", type=["csv"], key="rtm_links_reload")
