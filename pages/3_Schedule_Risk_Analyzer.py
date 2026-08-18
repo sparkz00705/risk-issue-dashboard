@@ -45,7 +45,7 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             
             {schedule_text}
             
-            Generate 3 to 5 distinct risks in a clean Markdown table format with these exact columns:
+            Generate 8 to 10 distinct risks in a clean Markdown table format with these exact columns:
             | Risk_ID | Risk_Title | Category | Probability | Impact | Estimated_Delay_Days | AI_Mitigation_Recommendation |
             
             Crucial Instructions:
