@@ -7,7 +7,7 @@ st.set_page_config(
     page_icon="🛡️",
 )
 
-# Define multi-page navigation router pointing to separate page files
+# Define multi-page navigation router pointing to files inside the 'pages/' folder
 dashboard_page = st.Page(
     page="pages/1_Dashboard.py", 
     title="Intelligent Risk Management", 
