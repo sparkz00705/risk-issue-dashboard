@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from groq import Groq
-import re
 
 st.subheader("📅 AI Project Schedule Risk Analyzer")
 st.markdown("Upload your project schedule or task list to let AI identify critical path bottlenecks, timeline dependencies, and automatically generate project risks.")
@@ -66,9 +65,11 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             )
             
             ai_output = response.choices[0].message.content
-            # Clean think tags if any
-            ai_output = re.sub(r"<think>.*?</think>", "", ai_output, flags=re.DOTALL | r.IGNORECASE).strip()
             
+            # Simple string cleaning without regex flags
+            if "</think>" in ai_output:
+                ai_output = ai_output.split("</think>")[-1].strip()
+                
             st.session_state["extracted_schedule_risks"] = ai_output
             st.success("Schedule risks successfully extracted!")
             
