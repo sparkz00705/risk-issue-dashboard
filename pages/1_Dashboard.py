@@ -18,152 +18,152 @@ impact_weight = {"Low": 1, "Medium": 2, "High": 3, "Critical": 5}
 col_dl1, col_dl2 = st.columns(2)
 
 with col_dl1:
-  risk_template = pd.DataFrame({
-      "ID": ["RSK-001", "RSK-002"],
-      "Title": ["API Gateway Latency", "Key Developer Turnover"],
-      "Category": ["Technical", "Resource"],
-      "Probability": ["High", "Medium"],
-      "Impact": ["Critical", "High"],
-      "Status": ["Open", "Open"],
-  })
-  risk_template["Score"] = risk_template.apply(
-      lambda row: prob_weight.get(row["Probability"], 1)
-      * impact_weight.get(row["Impact"], 1),
-      axis=1,
-  )
-  risk_csv = risk_template.to_csv(index=False).encode("utf-8")
-  st.download_button(
-      label="📥 Download Risk Template",
-      data=risk_csv,
-      file_name="risk_template.csv",
-      mime="text/csv",
-  )
+    risk_template = pd.DataFrame({
+        "ID": ["RSK-001", "RSK-002"],
+        "Title": ["API Gateway Latency", "Key Developer Turnover"],
+        "Category": ["Technical", "Resource"],
+        "Probability": ["High", "Medium"],
+        "Impact": ["Critical", "High"],
+        "Status": ["Open", "Open"],
+    })
+    risk_template["Score"] = risk_template.apply(
+        lambda row: prob_weight.get(row["Probability"], 1)
+        * impact_weight.get(row["Impact"], 1),
+        axis=1,
+    )
+    risk_csv = risk_template.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download Risk Template",
+        data=risk_csv,
+        file_name="risk_template.csv",
+        mime="text/csv",
+    )
 
 with col_dl2:
-  issue_template = pd.DataFrame({
-      "ID": ["ISS-001", "ISS-002"],
-      "Title": ["Auth Service Outage", "Client Rejected Prototype"],
-      "Category": ["Technical", "Product"],
-      "Severity": ["Critical", "High"],
-      "Status": ["In Progress", "Open"],
-      "Linked_Risk": ["RSK-001", "None"],
-  })
-  issue_csv = issue_template.to_csv(index=False).encode("utf-8")
-  st.download_button(
-      label="📥 Download Issue Template",
-      data=issue_csv,
-      file_name="issue_template.csv",
-      mime="text/csv",
-  )
+    issue_template = pd.DataFrame({
+        "ID": ["ISS-001", "ISS-002"],
+        "Title": ["Auth Service Outage", "Client Rejected Prototype"],
+        "Category": ["Technical", "Product"],
+        "Severity": ["Critical", "High"],
+        "Status": ["In Progress", "Open"],
+        "Linked_Risk": ["RSK-001", "None"],
+    })
+    issue_csv = issue_template.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download Issue Template",
+        data=issue_csv,
+        file_name="issue_template.csv",
+        mime="text/csv",
+    )
 
 upload_tab1, upload_tab2 = st.tabs(
     ["Upload Risk Register", "Upload Issue Log"]
 )
 
 with upload_tab1:
-  uploaded_risk_file = st.file_uploader(
-      "Upload filled-in Risk CSV/Excel:", type=["csv", "xlsx"], key="risk_up"
-  )
-  if uploaded_risk_file is not None:
-    try:
-      data_risks = (
-          pd.read_csv(uploaded_risk_file)
-          if uploaded_risk_file.name.endswith(".csv")
-          else pd.read_excel(uploaded_risk_file)
-      )
-      data_risks["Probability"] = (
-          data_risks["Probability"].astype(str).str.strip()
-      )
-      data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
-      data_risks["Score"] = data_risks.apply(
-          lambda row: prob_weight.get(row["Probability"], 1)
-          * impact_weight.get(row["Impact"], 1),
-          axis=1,
-      )
-      st.success("Custom Risk dataset loaded and auto-scored successfully!")
-    except Exception:
-      data_risks = pd.DataFrame({
-          "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
-          "Title": [
-              "API Gateway Latency",
-              "Key Developer Turnover",
-              "Third-party Vendor Delay",
-              "Compliance Scope Creep",
-              "Database Scalability Limit",
-          ],
-          "Category": [
-              "Technical",
-              "Resource",
-              "Supply Chain",
-              "Legal",
-              "Technical",
-          ],
-          "Probability": ["High", "Medium", "Low", "High", "Medium"],
-          "Impact": ["Critical", "High", "Medium", "High", "Critical"],
-          "Score": [15, 9, 4, 12, 10],
-          "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
-      })
-  else:
-    data_risks = pd.DataFrame({
-        "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
-        "Title": [
-            "API Gateway Latency",
-            "Key Developer Turnover",
-            "Third-party Vendor Delay",
-            "Compliance Scope Creep",
-            "Database Scalability Limit",
-        ],
-        "Category": [
-            "Technical",
-            "Resource",
-            "Supply Chain",
-            "Legal",
-            "Technical",
-        ],
-        "Probability": ["High", "Medium", "Low", "High", "Medium"],
-        "Impact": ["Critical", "High", "Medium", "High", "Critical"],
-        "Score": [15, 9, 4, 12, 10],
-        "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
-    })
+    uploaded_risk_file = st.file_uploader(
+        "Upload filled-in Risk CSV/Excel:", type=["csv", "xlsx"], key="risk_up"
+    )
+    if uploaded_risk_file is not None:
+        try:
+            data_risks = (
+                pd.read_csv(uploaded_risk_file)
+                if uploaded_risk_file.name.endswith(".csv")
+                else pd.read_excel(uploaded_risk_file)
+            )
+            data_risks["Probability"] = (
+                data_risks["Probability"].astype(str).str.strip()
+            )
+            data_risks["Impact"] = data_risks["Impact"].astype(str).str.strip()
+            data_risks["Score"] = data_risks.apply(
+                lambda row: prob_weight.get(row["Probability"], 1)
+                * impact_weight.get(row["Impact"], 1),
+                axis=1,
+            )
+            st.success("Custom Risk dataset loaded and auto-scored successfully!")
+        except Exception:
+            data_risks = pd.DataFrame({
+                "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
+                "Title": [
+                    "API Gateway Latency",
+                    "Key Developer Turnover",
+                    "Third-party Vendor Delay",
+                    "Compliance Scope Creep",
+                    "Database Scalability Limit",
+                ],
+                "Category": [
+                    "Technical",
+                    "Resource",
+                    "Supply Chain",
+                    "Legal",
+                    "Technical",
+                ],
+                "Probability": ["High", "Medium", "Low", "High", "Medium"],
+                "Impact": ["Critical", "High", "Medium", "High", "Critical"],
+                "Score": [15, 9, 4, 12, 10],
+                "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+            })
+    else:
+        data_risks = pd.DataFrame({
+            "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
+            "Title": [
+                "API Gateway Latency",
+                "Key Developer Turnover",
+                "Third-party Vendor Delay",
+                "Compliance Scope Creep",
+                "Database Scalability Limit",
+            ],
+            "Category": [
+                "Technical",
+                "Resource",
+                "Supply Chain",
+                "Legal",
+                "Technical",
+            ],
+            "Probability": ["High", "Medium", "Low", "High", "Medium"],
+            "Impact": ["Critical", "High", "Medium", "High", "Critical"],
+            "Score": [15, 9, 4, 12, 10],
+            "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+        })
 
 with upload_tab2:
-  uploaded_issue_file = st.file_uploader(
-      "Upload filled-in Issue CSV/Excel:", type=["csv", "xlsx"], key="issue_up"
-  )
-  if uploaded_issue_file is not None:
-    try:
-      data_issues = (
-          pd.read_csv(uploaded_issue_file)
-          if uploaded_issue_file.name.endswith(".csv")
-          else pd.read_excel(uploaded_issue_file)
-      )
-      st.success("Custom Issue dataset loaded successfully!")
-    except Exception:
-      data_issues = pd.DataFrame({
-          "ID": ["ISS-001", "ISS-002", "ISS-003"],
-          "Title": [
-              "Auth Service Outage",
-              "Client Rejected Prototype",
-              "Staging Environment Down",
-          ],
-          "Category": ["Technical", "Product", "Infrastructure"],
-          "Severity": ["Critical", "High", "High"],
-          "Status": ["In Progress", "Open", "Resolved"],
-          "Linked_Risk": ["RSK-005", "None", "RSK-001"],
-      })
-  else:
-    data_issues = pd.DataFrame({
-        "ID": ["ISS-001", "ISS-002", "ISS-003"],
-        "Title": [
-            "Auth Service Outage",
-            "Client Rejected Prototype",
-            "Staging Environment Down",
-        ],
-        "Category": ["Technical", "Product", "Infrastructure"],
-        "Severity": ["Critical", "High", "High"],
-        "Status": ["In Progress", "Open", "Resolved"],
-        "Linked_Risk": ["RSK-005", "None", "RSK-001"],
-    })
+    uploaded_issue_file = st.file_uploader(
+        "Upload filled-in Issue CSV/Excel:", type=["csv", "xlsx"], key="issue_up"
+    )
+    if uploaded_issue_file is not None:
+        try:
+            data_issues = (
+                pd.read_csv(uploaded_issue_file)
+                if uploaded_issue_file.name.endswith(".csv")
+                else pd.read_excel(uploaded_issue_file)
+            )
+            st.success("Custom Issue dataset loaded successfully!")
+        except Exception:
+            data_issues = pd.DataFrame({
+                "ID": ["ISS-001", "ISS-002", "ISS-003"],
+                "Title": [
+                    "Auth Service Outage",
+                    "Client Rejected Prototype",
+                    "Staging Environment Down",
+                ],
+                "Category": ["Technical", "Product", "Infrastructure"],
+                "Severity": ["Critical", "High", "High"],
+                "Status": ["In Progress", "Open", "Resolved"],
+                "Linked_Risk": ["RSK-005", "None", "RSK-001"],
+            })
+    else:
+        data_issues = pd.DataFrame({
+            "ID": ["ISS-001", "ISS-002", "ISS-003"],
+            "Title": [
+                "Auth Service Outage",
+                "Client Rejected Prototype",
+                "Staging Environment Down",
+            ],
+            "Category": ["Technical", "Product", "Infrastructure"],
+            "Severity": ["Critical", "High", "High"],
+            "Status": ["In Progress", "Open", "Resolved"],
+            "Linked_Risk": ["RSK-005", "None", "RSK-001"],
+        })
 
 # --- TOP KPI METRICS ROW ---
 col1, col2, col3, col4 = st.columns(4)
@@ -349,32 +349,32 @@ st.markdown("---")
 c1, c2 = st.columns(2)
 
 with c1:
-  st.subheader("⚠️ Risk Matrix Heatmap")
-  st.caption("Note: Bubble size represents the Risk Score (Score = Probability × Impact).")
-  fig_risk = px.scatter(
-      data_risks,
-      x="Probability",
-      y="Impact",
-      color="Category",
-      hover_data=["Title", "ID"],
-      size="Score",
-      title="Active Risk Distribution",
-      template="plotly_dark",
-  )
-  st.plotly_chart(fig_risk, use_container_width=True)
+    st.subheader("⚠️ Risk Matrix Heatmap")
+    st.caption("Note: Bubble size represents the Risk Score (Score = Probability × Impact).")
+    fig_risk = px.scatter(
+        data_risks,
+        x="Probability",
+        y="Impact",
+        color="Category",
+        hover_data=["Title", "ID"],
+        size="Score",
+        title="Active Risk Distribution",
+        template="plotly_dark",
+    )
+    st.plotly_chart(fig_risk, use_container_width=True)
 
 with c2:
-  st.subheader("🔥 Issues by Category & Severity")
-  st.caption("Tracking active operational blocks currently hindering execution.")
-  fig_issue = px.bar(
-      data_issues,
-      x="Category",
-      color="Severity",
-      title="Current Active Roadblocks",
-      barmode="group",
-      template="plotly_dark",
-  )
-  st.plotly_chart(fig_issue, use_container_width=True)
+    st.subheader("🔥 Issues by Category & Severity")
+    st.caption("Tracking active operational blocks currently hindering execution.")
+    fig_issue = px.bar(
+        data_issues,
+        x="Category",
+        color="Severity",
+        title="Current Active Roadblocks",
+        barmode="group",
+        template="plotly_dark",
+    )
+    st.plotly_chart(fig_issue, use_container_width=True)
 
 st.markdown("---")
 
