@@ -1,44 +1,17 @@
-"""
-rtm_section.py
-================
-Requirements Traceability Matrix section, built to drop straight into your
-existing app.py — same style as the rest of the file: flat pandas DataFrames,
-st.download_button template pattern, Groq for AI calls, no database.
-
-HOW TO INTEGRATE
------------------
-1. Paste the CONSTANTS + FUNCTIONS below into app.py (or `from rtm_section
-   import render_requirements_traceability_section` if you'd rather keep it
-   as a separate file — either works, nothing here depends on Streamlit
-   multipage routing).
-2. Call render_requirements_traceability_section(data_risks) once, near the
-   end of app.py, after data_risks is defined (it reuses your existing risk
-   register directly — no duplicate risk table).
-
-WHY A SINGLE FLAT LINKS TABLE
--------------------------------
-Your app has no Mitigation or Test-case entities today — Risk Status
-(Open/Mitigated/Materialized) is the closest thing you track. Rather than
-bolt on three more normalized tables, each Requirement<->Risk link carries
-its own Mitigation_Status and Test_Status directly. One requirement mapped
-to two risks just means two rows in RTM Links. This is the flat-CSV
-equivalent of the fully-normalized version, and matches how Linked_Risk
-already works on your Issue Log.
-"""
-
 import json
 import uuid
 from datetime import datetime
-
 import pandas as pd
 import streamlit as st
 from groq import Groq
 
+st.set_page_config(
+    page_title="Requirements Traceability Matrix",
+    page_icon="🔗",
+    layout="wide"
+)
 
-# --------------------------------------------------------------------------
 # Schema & constants
-# --------------------------------------------------------------------------
-
 REQUIREMENT_TYPES = ["User Story", "Technical Spec", "Compliance", "Non-Functional"]
 REQUIREMENT_PRIORITIES = ["Low", "Medium", "High", "Critical"]
 REQUIREMENT_STATUSES = ["Draft", "Approved", "Implemented", "Verified"]
@@ -53,20 +26,12 @@ RTM_LINKS_COLUMNS = [
 
 _HEALTH_COLOR = {"Healthy": "🟢", "At Risk": "🟠", "Gap": "🔴", "Orphan": "⚪"}
 
-
 def _new_id(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:6].upper()}"
-
 
 def _init_rtm_session_state():
     if "rtm_links" not in st.session_state:
         st.session_state["rtm_links"] = pd.DataFrame(columns=RTM_LINKS_COLUMNS)
-
-
-# --------------------------------------------------------------------------
-# Requirements register — same template-download + upload pattern as
-# your existing Risk/Issue tabs
-# --------------------------------------------------------------------------
 
 def _load_requirements_register() -> pd.DataFrame:
     req_template = pd.DataFrame({
@@ -119,29 +84,31 @@ def _load_requirements_register() -> pd.DataFrame:
 
     return data_requirements
 
-
-# --------------------------------------------------------------------------
-# Bi-directional lookups + coverage health (pure pandas, recomputed each rerun)
-# --------------------------------------------------------------------------
+# Shared fallback risk dataset
+data_risks = pd.DataFrame({
+    "ID": ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005"],
+    "Title": [
+        "API Gateway Latency", "Key Developer Turnover",
+        "Third-party Vendor Delay", "Compliance Scope Creep",
+        "Database Scalability Limit",
+    ],
+    "Category": ["Technical", "Resource", "Supply Chain", "Legal", "Technical"],
+    "Probability": ["High", "Medium", "Low", "High", "Medium"],
+    "Impact": ["Critical", "High", "Medium", "High", "Critical"],
+    "Score": [15, 9, 4, 12, 10],
+    "Status": ["Open", "Open", "Mitigated", "Open", "Materialized"],
+})
 
 def _confirmed_links() -> pd.DataFrame:
     links = st.session_state["rtm_links"]
     return links[links["Review_Status"] == "Confirmed"]
-
 
 def _risks_for_requirement(req_id: str, data_risks: pd.DataFrame) -> pd.DataFrame:
     links = _confirmed_links()
     risk_ids = links.loc[links["Requirement_ID"] == req_id, "Risk_ID"]
     return data_risks[data_risks["ID"].isin(risk_ids)]
 
-
-def _requirements_for_risk(risk_id: str, data_requirements: pd.DataFrame) -> pd.DataFrame:
-    links = _confirmed_links()
-    req_ids = links.loc[links["Risk_ID"] == risk_id, "Requirement_ID"]
-    return data_requirements[data_requirements["ID"].isin(req_ids)]
-
-
-def _compute_requirement_health(req_id: str) -> str:
+def _compute_requirement_health(req_id: str, data_reqs: pd.DataFrame) -> str:
     links = _confirmed_links()
     req_links = links[links["Requirement_ID"] == req_id]
     if req_links.empty:
@@ -153,27 +120,19 @@ def _compute_requirement_health(req_id: str) -> str:
     in_progress = req_links["Mitigation_Status"].isin(["Planned", "In Progress", "Implemented", "Verified"]).any()
     return "At Risk" if in_progress else "Gap"
 
-
 def _find_orphan_requirements(data_requirements: pd.DataFrame) -> pd.DataFrame:
     linked_ids = set(_confirmed_links()["Requirement_ID"])
     return data_requirements[~data_requirements["ID"].isin(linked_ids)]
 
-
 def _find_unmapped_risks(data_risks: pd.DataFrame) -> pd.DataFrame:
     linked_ids = set(_confirmed_links()["Risk_ID"])
     return data_risks[~data_risks["ID"].isin(linked_ids)]
-
 
 def _find_unmitigated_linked_risks(data_risks: pd.DataFrame) -> pd.DataFrame:
     links = _confirmed_links()
     linked_ids = set(links["Risk_ID"])
     mitigated_ids = set(links.loc[links["Mitigation_Status"].isin(["Implemented", "Verified"]), "Risk_ID"])
     return data_risks[data_risks["ID"].isin(linked_ids - mitigated_ids)]
-
-
-# --------------------------------------------------------------------------
-# AI mapping engine — Groq, same call pattern as your existing AI sections
-# --------------------------------------------------------------------------
 
 _RTM_SYSTEM_PROMPT = """You are a risk-mapping assistant inside a Requirements \
 Traceability Matrix tool. Given one requirement and a shortlist of candidate \
@@ -191,14 +150,8 @@ Respond with ONLY valid JSON, no markdown fences, no preamble:
 {"matches": [{"risk_id": "RSK-001", "confidence": 0.0, "rationale": "..."}]}
 """
 
-
 def _shortlist_candidate_risks(req_row: pd.Series, data_risks: pd.DataFrame, top_k: int = 6) -> pd.DataFrame:
-    """Cheap keyword pre-filter so every requirement doesn't have to be scored
-    against the entire risk register in the prompt. Swap for embeddings once
-    your risk register is large enough that this misses relevant matches."""
-    stopwords = {"the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with",
-                 "user", "users", "system", "should", "must", "can", "is", "are"}
-
+    stopwords = {"the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with", "user", "users", "system", "should", "must", "can", "is", "are"}
     def tokens(text):
         return {w.lower() for w in str(text).split() if w.lower() not in stopwords and len(w) > 2}
 
@@ -208,8 +161,6 @@ def _shortlist_candidate_risks(req_row: pd.Series, data_risks: pd.DataFrame, top
         risk_tokens = tokens(risk["Title"]) | tokens(risk.get("Category", ""))
         overlap = len(req_tokens & risk_tokens)
         scored.append((risk, overlap))
-    # if keyword overlap finds nothing, fall back to same-category risks so the
-    # LLM still gets a reasonable shortlist instead of an empty one
     scored.sort(key=lambda pair: pair[1], reverse=True)
     top = [r for r, score in scored if score > 0][:top_k]
     if not top:
@@ -217,11 +168,7 @@ def _shortlist_candidate_risks(req_row: pd.Series, data_risks: pd.DataFrame, top
         top = [pd.Series(r) for r in top]
     return pd.DataFrame(top) if top else data_risks.head(0)
 
-
-def run_ai_mapping_pass(data_requirements: pd.DataFrame, data_risks: pd.DataFrame,
-                         confidence_floor: float = 0.5) -> int:
-    """Runs AI mapping for every currently-orphan requirement and appends
-    pending-review rows to st.session_state['rtm_links']. Returns count added."""
+def run_ai_mapping_pass(data_requirements: pd.DataFrame, data_risks: pd.DataFrame, confidence_floor: float = 0.5) -> int:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     orphans = _find_orphan_requirements(data_requirements)
     new_rows = []
@@ -276,15 +223,10 @@ def run_ai_mapping_pass(data_requirements: pd.DataFrame, data_risks: pd.DataFram
     return len(new_rows)
 
 
-# --------------------------------------------------------------------------
-# Main render function — call this once from app.py
-# --------------------------------------------------------------------------
-
-def render_requirements_traceability_section(data_risks: pd.DataFrame):
+def render_requirements_traceability_section():
     _init_rtm_session_state()
 
-    st.markdown("---")
-    st.subheader("🔗 Requirements Traceability Matrix")
+    st.title("🔗 Requirements Traceability Matrix")
     st.markdown(
         "Trace each requirement to the risks it creates or depends on, and see at a glance "
         "which requirements have a real mitigation and passing test behind them."
@@ -293,9 +235,8 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
     st.markdown("##### 📁 Requirements Register")
     data_requirements = _load_requirements_register()
 
-    # ---- KPI row, matching your existing metric-card style ----
     reqs_with_health = data_requirements.copy()
-    reqs_with_health["Health"] = reqs_with_health["ID"].apply(_compute_requirement_health)
+    reqs_with_health["Health"] = reqs_with_health["ID"].apply(lambda r_id: _compute_requirement_health(r_id, data_requirements))
     total = len(reqs_with_health)
     healthy_pct = round(100 * (reqs_with_health["Health"] == "Healthy").sum() / total, 1) if total else 0
 
@@ -307,7 +248,6 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
 
     st.markdown("---")
 
-    # ---- AI mapping trigger, matching your existing button+spinner pattern ----
     st.markdown("##### 🤖 AI-Powered Mapping")
     st.caption("Runs Groq against every requirement with no linked risk yet and proposes matches for review below.")
     if st.button("Run AI Mapping Pass on Orphan Requirements", type="primary", key="rtm_ai_map_btn"):
@@ -322,7 +262,6 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
         f"AI Suggestions ({len(st.session_state['rtm_links'][st.session_state['rtm_links']['Review_Status'] == 'Pending Review'])})",
     ])
 
-    # ---- Matrix tab ----
     with tab_matrix:
         priority_rank = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
         view = reqs_with_health.assign(
@@ -344,7 +283,6 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
                             f"&nbsp;&nbsp;&nbsp;&nbsp;Mitigation: *{link_row['Mitigation_Status']}*  |  Test: *{link_row['Test_Status']}*"
                         )
 
-                # manual link + status update form
                 with st.form(key=f"rtm_form_{req['ID']}", border=False):
                     c1, c2, c3 = st.columns(3)
                     risk_choice = c1.selectbox("Link risk", data_risks["ID"] + " — " + data_risks["Title"], key=f"rtm_risk_{req['ID']}")
@@ -363,7 +301,6 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
                         )
                         st.rerun()
 
-    # ---- Gap analysis tab ----
     with tab_gaps:
         col_a, col_b = st.columns(2)
         with col_a:
@@ -380,7 +317,6 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
             st.markdown("**Linked risks with no mitigation in progress**")
             st.dataframe(unmitigated[["ID", "Title", "Score"]], hide_index=True, use_container_width=True)
 
-    # ---- AI suggestions review tab ----
     with tab_ai:
         st.caption("AI-proposed links wait here until confirmed or rejected — nothing here counts toward coverage yet.")
         links = st.session_state["rtm_links"]
@@ -408,16 +344,17 @@ def render_requirements_traceability_section(data_risks: pd.DataFrame):
                         st.session_state["rtm_links"] = links[links["Link_ID"] != s["Link_ID"]]
                         st.rerun()
 
-    # ---- persistence: export the links table (no DB — CSV, same as everything else) ----
     st.markdown("---")
     st.download_button(
         "📥 Download RTM Links (CSV)",
         data=st.session_state["rtm_links"].to_csv(index=False).encode("utf-8"),
         file_name="rtm_links.csv",
-        mime="text/csv",
+        mime="text/css",
         key="rtm_links_dl",
     )
     reload_file = st.file_uploader("Reload previously saved RTM Links CSV", type=["csv"], key="rtm_links_reload")
     if reload_file is not None and st.button("Reload links", key="rtm_links_reload_btn"):
         st.session_state["rtm_links"] = pd.read_csv(reload_file)
         st.rerun()
+
+render_requirements_traceability_section()
