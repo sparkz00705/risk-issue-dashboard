@@ -41,34 +41,37 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             schedule_text = data_schedule.to_string(index=False)
             
             prompt = f"""
-            You are a senior project scheduler and risk manager. Analyze the following project schedule data:
+            Analyze the following project schedule data and identify bottlenecks, dependency risks, and single-point-of-failure owners:
             
             {schedule_text}
             
-            Task:
-            Identify potential timeline bottlenecks, dependency risks, and single-point-of-failure owners. Generate 3 to 5 distinct risks derived directly from this schedule.
-            
-            Provide your response strictly in a clean Markdown table format with these columns:
+            Generate 3 to 5 distinct risks in a clean Markdown table format with these exact columns:
             | Risk_ID | Risk_Title | Category | Probability | Impact | Estimated_Delay_Days | AI_Mitigation_Recommendation |
             
-            Respond with ONLY the markdown table. Do not include any thinking tags or preamble.
+            Return ONLY the markdown table. Do not include thinking text, explanations, or conversational filler.
             """
             
             response = client.chat.completions.create(
                 model="qwen/qwen3.6-27b",
                 messages=[
-                    {"role": "system", "content": "You are an expert risk manager. Respond with only the markdown table requested."},
+                    {"role": "system", "content": "You are a senior project risk manager. Output only the requested Markdown table and absolutely nothing else."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=2048,
-                temperature=0.3,
+                temperature=0.2,
             )
             
             ai_output = response.choices[0].message.content
             
-            # Simple string cleaning without regex flags
+            # Clean out any accidental think tags or conversational text
             if "</think>" in ai_output:
                 ai_output = ai_output.split("</think>")[-1].strip()
+            
+            # Isolate the markdown table if extra text exists
+            if "|" in ai_output:
+                lines = ai_output.split("\n")
+                table_lines = [line for line in lines if "|" in line]
+                ai_output = "\n".join(table_lines)
                 
             st.session_state["extracted_schedule_risks"] = ai_output
             st.success("Schedule risks successfully extracted!")
