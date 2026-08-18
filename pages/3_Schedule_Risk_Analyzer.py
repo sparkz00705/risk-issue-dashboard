@@ -48,7 +48,9 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             Generate 3 to 5 distinct risks in a clean Markdown table format with these exact columns:
             | Risk_ID | Risk_Title | Category | Probability | Impact | Estimated_Delay_Days | AI_Mitigation_Recommendation |
             
-            Return ONLY the markdown table. Do not include thinking text, explanations, or conversational filler.
+            Crucial Instructions:
+            1. Every single row must contain a robust, non-empty, actionable sentence in the 'AI_Mitigation_Recommendation' column. Do not leave any cell blank.
+            2. Return ONLY the markdown table. Do not include thinking text, explanations, or conversational filler.
             """
             
             response = client.chat.completions.create(
