@@ -348,9 +348,14 @@ if generate_clicked:
                 messages=[
                     {"role": "system", "content": "You are an expert senior project portfolio director. Respond with only the final report — never include your reasoning or <think> content."},
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                max_tokens=4096,
+                temperature=0.4,
             )
             raw_text = response.choices[0].message.content
+            finish_reason = response.choices[0].finish_reason
+            if finish_reason == "length":
+                st.warning("The AI response was cut off by the token limit. Consider raising max_tokens further if this recurs.")
             st.session_state["ai_report_text"] = clean_ai_response(raw_text)
             st.success("Real-time AI analysis complete! Download your report below.")
         except Exception as e:
@@ -457,7 +462,9 @@ if submit_scoring and new_risk_desc:
                 messages=[
                     {"role": "system", "content": "You are an expert risk management consultant. Respond with only the final structured evaluation — never include your reasoning or <think> content."},
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                max_tokens=1024,
+                temperature=0.4,
             )
             st.success("Risk analysis complete!")
             st.markdown(clean_ai_response(response.choices[0].message.content))
