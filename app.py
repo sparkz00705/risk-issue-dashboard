@@ -271,7 +271,7 @@ if generate_clicked:
             """
             
             response = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": "You are an expert senior project portfolio director."},
                     {"role": "user", "content": prompt}
@@ -393,7 +393,7 @@ if submit_scoring and new_risk_desc:
             - **Justification & Mitigation Advice:** [Short strategic reasoning and preventive advice]
             """
             response = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": "You are an expert risk management consultant."},
                     {"role": "user", "content": prompt}
