@@ -240,7 +240,7 @@ def run_ai_mapping_pass(data_requirements: pd.DataFrame, data_risks: pd.DataFram
 
         try:
             response = client.chat.completions.create(
-                model="llama-3.1-70b-versatile",
+                model="qwen/qwen3.6-27b",
                 messages=[
                     {"role": "system", "content": _RTM_SYSTEM_PROMPT},
                     {"role": "user", "content": prompt},
