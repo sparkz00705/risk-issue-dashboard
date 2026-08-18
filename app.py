@@ -5,16 +5,30 @@ from groq import Groq
 import streamlit as st
 import streamlit.components.v1 as components
 import requests
-import streamlit as st
-from rtm_section import render_requirements_traceability_section
 
-# --- PAGE CONFIGURATION & LUXURY STYLING ---
+# --- PAGE CONFIGURATION & NAVIGATION SETUP ---
 st.set_page_config(
     page_title="Intelligent Risk Management",
     layout="wide",
     page_icon="🛡️",
 )
 
+# Define multi-page navigation router
+dashboard_page = st.Page(
+    page="app.py", 
+    title="Intelligent Risk Management", 
+    icon="🛡️", 
+    default=True
+)
+
+rtm_page = st.Page(
+    page="pages/rtm_page.py", 
+    title="Requirements Traceability Matrix", 
+    icon="🔗"
+)
+
+pg = st.navigation([dashboard_page, rtm_page])
+pg.run()
 
 # --- Custom Styling ---
 st.markdown(
@@ -235,28 +249,15 @@ if "ai_report_text" not in st.session_state:
     st.session_state["ai_report_text"] = None
 
 
-# ---------------------------------------------------------------------------
-# FIX #1: strip <think>...</think> reasoning blocks.
-# Reasoning-capable Groq models (e.g. qwen3.x) emit their chain-of-thought
-# wrapped in <think> tags BEFORE the actual answer. The original code fed
-# that raw text straight into the HTML report, which is why the downloaded
-# report was full of "Here's a thinking process..." instead of the report.
-# ---------------------------------------------------------------------------
 def clean_ai_response(raw_text: str) -> str:
     if not raw_text:
         return raw_text
     cleaned = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL | re.IGNORECASE)
-    # Handle an unclosed <think> tag (stream cut off mid-reasoning)
     if "<think>" in cleaned.lower() and "</think>" not in cleaned.lower():
         cleaned = re.split(r"<think>", cleaned, flags=re.IGNORECASE)[0]
     return cleaned.strip()
 
 
-# ---------------------------------------------------------------------------
-# FIX #2: proper markdown -> HTML conversion.
-# The original parser never closed <h2>/<h3> tags, never wrapped bullets in
-# <ul>, and never converted **bold**. This version does all three.
-# ---------------------------------------------------------------------------
 def markdown_to_report_html(md_text: str) -> str:
     lines = md_text.split("\n")
     html_parts = []
@@ -472,10 +473,6 @@ if submit_scoring and new_risk_desc:
             st.error(f"API Error: {e}")
 
 st.markdown("---")
-
-
-render_requirements_traceability_section(data_risks)
-
 
 # --- SECTION 3: INTERACTIVE REGISTERS & DEFINITIONS ---
 st.subheader("📋 Core Records & Status Definitions")
