@@ -59,7 +59,7 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
                     {"role": "system", "content": "You are a senior project risk manager. Output only the requested Markdown table and absolutely nothing else."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=2048,
+                max_tokens=4096,
                 temperature=0.2,
             )
             
