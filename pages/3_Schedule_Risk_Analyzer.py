@@ -45,7 +45,7 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             
             {schedule_text}
             
-            Generate 8 to 10 distinct risks in a clean Markdown table format with these exact columns:
+            Generate 3 to 5 distinct risks in a clean Markdown table format with these exact columns:
             | Risk_ID | Risk_Title | Category | Probability | Impact | Estimated_Delay_Days | AI_Mitigation_Recommendation |
             
             Crucial Instructions:
@@ -83,7 +83,10 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
 
 if "extracted_schedule_risks" in st.session_state:
     st.markdown("### Extracted Schedule Risks")
-    st.markdown(st.session_state["extracted_schedule_risks"])
+    
+    # Wrap in a bordered container for full visibility and clean scrolling
+    with st.container(border=True):
+        st.markdown(st.session_state["extracted_schedule_risks"])
     
     if st.button("📥 Download Extracted Schedule Risks (Markdown)", type="secondary"):
         st.download_button(
