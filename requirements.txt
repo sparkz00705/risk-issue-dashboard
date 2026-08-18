@@ -4,4 +4,4 @@ plotly
 google-genai
 openpyxl
 groq
-
+selenium
