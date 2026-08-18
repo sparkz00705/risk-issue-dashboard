@@ -2,14 +2,28 @@ name: Wake Up Streamlit App
 
 on:
   schedule:
-    # Runs every 1 hours (adjust the cron expression if you prefer a different frequency)
-    - cron: '0 */1 * * *'
-  workflow_dispatch: # Allows you to manually trigger the workflow from GitHub
+    - cron: '0 */1 * * *'  # Runs every 4 hours (adjust as needed)
+  workflow_dispatch: 
 
 jobs:
-  ping:
+  wake:
     runs-on: ubuntu-latest
     steps:
-      - name: Send HTTP request to keep app alive
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
         run: |
-          curl -I https://ai-risk-issue-dashboard.streamlit.app/
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager
+
+      - name: Run wake-up script
+        env:
+          STREAMLIT_APP_URL: "https://ai-risk-issue-dashboard.streamlit.app/"
+        run: |
+          python wake_up.py
