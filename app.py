@@ -118,11 +118,10 @@ schedule_page = st.Page(
     icon="📅"
 )
 
-# 1. Add the User Guide page here
 user_guide_page = st.Page(
     page="pages/4_User_Guide.py",
     title="User Guide",
     icon="📖"
 )
-pg = st.navigation([dashboard_page, rtm_page, schedule_page])
+pg = st.navigation([dashboard_page, rtm_page, schedule_page,user_guide_page])
 pg.run()
