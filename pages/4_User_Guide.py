@@ -1,63 +1,35 @@
-import streamlit as st
+1. What Does This App Do?
+This application helps project teams track potential project problems, map requirements, analyze schedules, and generate professional reports—all in one place. It creates a continuous loop between tasks, risks, and technical requirements.   
 
-st.subheader("📖 Intelligent Risk Management - User Guide")
-st.markdown("Learn how to navigate, use, and document the intelligent risk management workflow step-by-step.")
-
-guide_text = """
-## 1. What Does This App Do?
-This application helps project teams track potential project problems, map requirements, analyze schedules, and generate professional reports—all in one place. It creates a continuous loop between tasks, risks, and technical requirements.
-
-## 2. Step-by-Step User Workflow:
-
-### Step 1: Manage Data Sources (Home Dashboard)
-* **Where to go:** The main home page.
-* **What you do:** Download templates if needed, and upload your customized Risk Registers, Issue Logs, or project data files using the file upload section.
-* **Why you do it:** This sets up the foundational data so the rest of the application can automatically build charts, heatmaps, and summaries.
-
-### Step 2: Analyze Schedule Risks
-* **Where to go:** Click on 'Schedule Risk Analyzer' in the sidebar.
-* **What you do:** Upload your project schedule (`.csv` or `.xlsx`) containing tasks, timelines, and dependencies. Click the button to extract risks using AI.
-* **Why you do it:** The AI instantly scans your task list, spots bottlenecks or dependencies, and creates a clear risk table complete with suggested solutions and delay estimates.
-
-### Step 3: Track Requirements (RTM)
-* **Where to go:** Click on 'Requirements Traceability Matrix' in the sidebar.
-* **What you do:** Review how project requirements link directly to potential risks and test statuses.
-* **Why you do it:** It ensures that every technical feature or requirement has a safety plan and testing method in place.
-
-### Step 4: Generate Executive Reports
-* **Where to go:** Back to the main home page.
-* **What you do:** Click the button to 'Generate AI Project RAG Report'.
-* **Why you do it:** It compiles all active risks, issues, and project statuses into a clean, standalone report that you can easily share with leadership.
-"""
-
-st.markdown(guide_text)
-
-st.markdown("---")
-
-plain_download_text = """INTELLIGENT RISK MANAGEMENT - USER GUIDE & WORKFLOW
-
-1. WHAT DOES THIS APP DO?
-This application helps project teams track potential project problems, map requirements, analyze schedules, and generate professional reports—all in one place.
-
-2. STEP-BY-STEP USER WORKFLOW:
-
+2. Step-by-Step User Workflow
 Step 1: Manage Data Sources (Home Dashboard)
-Upload your customized Risk Registers, Issue Logs, or project data files to set up foundational data.
+Where to go: The main Intelligent Risk Management home page.
+
+What you do: Upload your customized Risk Registers, Issue Logs, or project data files using the file upload section. You can also download templates if needed.
+
+Why you do it: This sets up the foundational data so the rest of the application can automatically build visual heatmaps, metrics, and summaries.
+
+Additional Feature - Risk Matrix Heatmap: Displays an interactive visual chart mapping project risks based on their Probability and Impact level.
+
+Additional Feature - AI Project RAG Report Generator: Compiles active risks, issues, and overall project statuses into an executive Red-Amber-Green (RAG) report.
 
 Step 2: Analyze Schedule Risks
-Upload your project schedule (.csv or .xlsx) and use the AI extractor to map dependencies and mitigation steps.
+Where to go: Click on Schedule Risk Analyzer in the sidebar.
+
+What you do: Upload your project schedule (.csv or .xlsx) containing tasks, timelines, owners, and dependencies. Click the button to extract risks using AI.
+
+Why you do it: The AI instantly scans your task list one by one to spot bottlenecks, single-point-of-failure owners, or dependencies. It generates a clear risk table complete with estimated delay days and step-by-step mitigation recommendations. You can also download the extracted risks as a markdown file.
 
 Step 3: Track Requirements (RTM)
-Review how project requirements link directly to potential risks and test statuses.
+Where to go: Click on Requirements Traceability Matrix in the sidebar.
 
-Step 4: Generate Executive Reports
-Compile all active risks, issues, and project statuses into an executive-ready format.
-"""
+What you do: Review how project requirements link directly to potential risks and test statuses (Passed, Pending, or Failed).
 
-st.download_button(
-    label="📥 Download User Guide (Text File)",
-    data=plain_download_text,
-    file_name="Intelligent_Risk_Management_User_Guide.txt",
-    mime="text/plain",
-    type="primary"
-)
+Why you do it: It ensures that every technical feature or requirement has a safety plan and testing method (such as Load Tests, Penetration Tests, or Chaos Tests) in place to eliminate delivery blind spots.
+
+Step 4: Access the User Guide & Download
+Where to go: Click on User Guide in the sidebar.
+
+What you do: Review step-by-step instructions or click the Download User Guide (Text File) button.
+
+Why you do it: Allows you to instantly save a local text copy of the operational guide to share with your team.
