@@ -34,7 +34,6 @@ st.markdown(guide_text)
 
 st.markdown("---")
 
-# Clean, dependency-free text file download for users
 plain_download_text = """INTELLIGENT RISK MANAGEMENT - USER GUIDE & WORKFLOW
 
 1. WHAT DOES THIS APP DO?
