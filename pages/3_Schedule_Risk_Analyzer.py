@@ -41,16 +41,20 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             schedule_text = data_schedule.to_string(index=False)
             
             prompt = f"""
-            Analyze the following project schedule data and identify bottlenecks, dependency risks, and single-point-of-failure owners:
+            Analyze the following project schedule data row by row:
             
             {schedule_text}
             
-            Generate 3 to 5 distinct risks in a clean Markdown table format with these exact columns:
+            Task:
+            You MUST generate exactly one corresponding risk for EVERY SINGLE task present in the schedule data above (do not skip any tasks, including Multi-Region Infrastructure Failover). 
+            
+            Provide your response strictly in a clean Markdown table format with these exact columns:
             | Risk_ID | Risk_Title | Category | Probability | Impact | Estimated_Delay_Days | AI_Mitigation_Recommendation |
             
-            Crucial Instructions:
-            1. Every single row must contain a robust, non-empty, actionable sentence in the 'AI_Mitigation_Recommendation' column. Do not leave any cell blank.
-            2. Return ONLY the markdown table. Do not include thinking text, explanations, or conversational filler.
+            Crucial Rules:
+            1. The number of rows in your output table must match the total number of tasks in the schedule.
+            2. Every row must have a fully populated, actionable sentence in the 'AI_Mitigation_Recommendation' column. Do not leave any cell blank.
+            3. Return ONLY the markdown table. Do not include thinking text, explanations, or conversational filler.
             """
             
             response = client.chat.completions.create(
@@ -84,7 +88,7 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
 if "extracted_schedule_risks" in st.session_state:
     st.markdown("### Extracted Schedule Risks")
     
-    # Wrap in a bordered container for full visibility and clean scrolling
+    # Wrap in a bordered container for full visibility and clean horizontal scrolling
     with st.container(border=True):
         st.markdown(st.session_state["extracted_schedule_risks"])
     
