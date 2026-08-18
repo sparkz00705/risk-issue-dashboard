@@ -44,6 +44,12 @@ def _load_requirements_register() -> pd.DataFrame:
     })
 
     col_dl, col_up = st.columns([1, 2])
+
+      with col_up:
+        uploaded_req_file = st.file_uploader(
+            "Upload filled-in Requirements CSV/Excel:", type=["csv", "xlsx"], key="rtm_req_up"
+        )
+          
     with col_dl:
         req_csv = req_template.to_csv(index=False).encode("utf-8")
         st.download_button(
@@ -54,10 +60,7 @@ def _load_requirements_register() -> pd.DataFrame:
             key="rtm_req_template_dl",
         )
 
-    with col_up:
-        uploaded_req_file = st.file_uploader(
-            "Upload filled-in Requirements CSV/Excel:", type=["csv", "xlsx"], key="rtm_req_up"
-        )
+  
 
     if uploaded_req_file is not None:
         try:
