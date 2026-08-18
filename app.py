@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import plotly.express as px
 from groq import Groq
@@ -233,75 +234,131 @@ with col_gen1:
 if "ai_report_text" not in st.session_state:
     st.session_state["ai_report_text"] = None
 
+
+# ---------------------------------------------------------------------------
+# FIX #1: strip <think>...</think> reasoning blocks.
+# Reasoning-capable Groq models (e.g. qwen3.x) emit their chain-of-thought
+# wrapped in <think> tags BEFORE the actual answer. The original code fed
+# that raw text straight into the HTML report, which is why the downloaded
+# report was full of "Here's a thinking process..." instead of the report.
+# ---------------------------------------------------------------------------
+def clean_ai_response(raw_text: str) -> str:
+    if not raw_text:
+        return raw_text
+    cleaned = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL | re.IGNORECASE)
+    # Handle an unclosed <think> tag (stream cut off mid-reasoning)
+    if "<think>" in cleaned.lower() and "</think>" not in cleaned.lower():
+        cleaned = re.split(r"<think>", cleaned, flags=re.IGNORECASE)[0]
+    return cleaned.strip()
+
+
+# ---------------------------------------------------------------------------
+# FIX #2: proper markdown -> HTML conversion.
+# The original parser never closed <h2>/<h3> tags, never wrapped bullets in
+# <ul>, and never converted **bold**. This version does all three.
+# ---------------------------------------------------------------------------
+def markdown_to_report_html(md_text: str) -> str:
+    lines = md_text.split("\n")
+    html_parts = []
+    in_list = False
+
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            html_parts.append("</ul>")
+            in_list = False
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line:
+            close_list()
+            continue
+
+        line = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", line)
+
+        if line.startswith("## "):
+            close_list()
+            html_parts.append(f"<h2>{line[3:].strip()}</h2>")
+        elif line.startswith("### "):
+            close_list()
+            html_parts.append(f"<h3>{line[4:].strip()}</h3>")
+        elif line.startswith("- ") or line.startswith("* "):
+            if not in_list:
+                html_parts.append("<ul>")
+                in_list = True
+            html_parts.append(f"<li>{line[2:].strip()}</li>")
+        else:
+            close_list()
+            html_parts.append(f"<p>{line}</p>")
+
+    close_list()
+    return "".join(html_parts)
+
+
+def highlight_rag_status(html: str) -> str:
+    colors = {"RED": "#dc2626", "AMBER": "#d97706", "GREEN": "#16a34a"}
+    for word, color in colors.items():
+        html = re.sub(
+            rf"\b{word}\b",
+            f'<span style="color: {color}; font-weight: bold; font-size: 1.2em;">{word}</span>',
+            html,
+        )
+    return html
+
+
 if generate_clicked:
     with st.spinner("Querying real-time Groq AI model..."):
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            
+
             risk_summary = data_risks.to_string(index=False)
             issue_summary = data_issues.to_string(index=False)
-            
+
             prompt = f"""
             You are a senior project portfolio director. Analyze the project registers below and fill out the standardized Project Status Report template.
-            
+
             CURRENT ACTIVE RISK REGISTER:
             {risk_summary}
-            
+
             CURRENT ACTIVE ISSUE LOG:
             {issue_summary}
-            
+
             Task:
-            Generate a complete executive project status report following this exact template structure using Markdown:
-            
+            Generate a complete executive project status report following this exact template structure using Markdown. Respond with ONLY the report itself — do not include any reasoning, thinking, or preamble before or after it.
+
             ## 📊 Executive Project Status Report
             - **Overall Project RAG Status:** [RED / AMBER / GREEN]
             - **Reporting Period:** Current Active Sprint / Real-Time Analysis
-            
+
             ### 1. Executive Summary & RAG Justification
             [Provide a concise overview explaining why this RAG status was assigned based on current open risks and issues]
-            
+
             ### 2. Key Highlights & Progress
             [Summarize current operational wins or milestones achieved]
-            
+
             ### 3. Materialized Risks & Active Roadblocks (Issues)
             [Highlight critical active items, blockers, and materialized risks impacting delivery]
-            
+
             ### 4. Corrective Action Plan (Turning Status to Green)
             [Provide concrete, prioritized, step-by-step remediation steps]
             """
-            
+
             response = client.chat.completions.create(
                 model="qwen/qwen3.6-27b",
                 messages=[
-                    {"role": "system", "content": "You are an expert senior project portfolio director."},
+                    {"role": "system", "content": "You are an expert senior project portfolio director. Respond with only the final report — never include your reasoning or <think> content."},
                     {"role": "user", "content": prompt}
                 ]
             )
-            st.session_state["ai_report_text"] = response.choices[0].message.content
+            raw_text = response.choices[0].message.content
+            st.session_state["ai_report_text"] = clean_ai_response(raw_text)
             st.success("Real-time AI analysis complete! Download your report below.")
         except Exception as e:
             st.error(f"API Error: {e}")
 
 if st.session_state["ai_report_text"]:
-    body_content = st.session_state["ai_report_text"]
-    body_content = body_content.replace('## ', '<h2>').replace('### ', '<h3>')
-    
-    lines = body_content.split('\n')
-    formatted_lines = []
-    for line in lines:
-        line = line.strip()
-        if line.startswith('<h2>') or line.startswith('<h3>'):
-            formatted_lines.append(line)
-        elif line.startswith('- ') or line.startswith('* '):
-            formatted_lines.append(f"<li>{line[2:]}</li>")
-        elif line:
-            formatted_lines.append(f"<p>{line}</p>")
-            
-    body_content = "".join(formatted_lines)
-    
-    body_content = body_content.replace('RED', '<span style="color: #dc2626; font-weight: bold; font-size: 1.2em;">RED</span>')
-    body_content = body_content.replace('AMBER', '<span style="color: #d97706; font-weight: bold; font-size: 1.2em;">AMBER</span>')
-    body_content = body_content.replace('GREEN', '<span style="color: #16a34a; font-weight: bold; font-size: 1.2em;">GREEN</span>')
+    body_content = markdown_to_report_html(st.session_state["ai_report_text"])
+    body_content = highlight_rag_status(body_content)
 
     report_html = f"""<!DOCTYPE html>
 <html>
@@ -313,14 +370,15 @@ if st.session_state["ai_report_text"]:
         h2 {{ color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px; }}
         h3 {{ color: #334155; margin-top: 24px; }}
         p {{ margin-bottom: 12px; }}
-        li {{ margin-bottom: 6px; margin-left: 20px; }}
+        ul {{ margin: 0 0 12px 0; padding-left: 20px; }}
+        li {{ margin-bottom: 6px; }}
     </style>
 </head>
 <body>
     {body_content}
 </body>
 </html>"""
-    
+
     with col_gen2:
         st.download_button(
             label="📥 Download Project Status Report (HTML)",
@@ -329,7 +387,7 @@ if st.session_state["ai_report_text"]:
             mime="text/html",
             type="secondary"
         )
-            
+
 st.markdown("---")
 
 # --- SECTION 2: VISUALIZATIONS & SCORE EXPLANATION ---
@@ -385,7 +443,9 @@ if submit_scoring and new_risk_desc:
             prompt = f"""
             Analyze the following project risk description and assign a structured risk evaluation:
             Description: {new_risk_desc}
-            
+
+            Respond with ONLY the structured evaluation below — no reasoning or <think> content.
+
             Provide your response strictly in this format:
             - **Probability:** [Low / Medium / High]
             - **Impact:** [Low / Medium / High / Critical]
@@ -395,12 +455,12 @@ if submit_scoring and new_risk_desc:
             response = client.chat.completions.create(
                 model="qwen/qwen3.6-27b",
                 messages=[
-                    {"role": "system", "content": "You are an expert risk management consultant."},
+                    {"role": "system", "content": "You are an expert risk management consultant. Respond with only the final structured evaluation — never include your reasoning or <think> content."},
                     {"role": "user", "content": prompt}
                 ]
             )
             st.success("Risk analysis complete!")
-            st.markdown(response.choices[0].message.content)
+            st.markdown(clean_ai_response(response.choices[0].message.content))
         except Exception as e:
             st.error(f"API Error: {e}")
 
