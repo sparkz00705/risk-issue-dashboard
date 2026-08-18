@@ -67,7 +67,7 @@ if st.button("Extract Risks from Schedule with AI", type="primary"):
             
             ai_output = response.choices[0].message.content
             # Clean think tags if any
-            ai_output = re.sub(r"<think>.*?</think>", "", ai_output, flags=r.DOTALL | r.IGNORECASE).strip()
+            ai_output = re.sub(r"<think>.*?</think>", "", ai_output, flags=re.DOTALL | r.IGNORECASE).strip()
             
             st.session_state["extracted_schedule_risks"] = ai_output
             st.success("Schedule risks successfully extracted!")
