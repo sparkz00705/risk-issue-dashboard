@@ -64,7 +64,7 @@ dashboard_page = st.Page(
 )
 
 rtm_page = st.Page(
-    page="pages/2_Requirements_Traceability_Matrix.py", 
+    page="pages/rtm_page.py", 
     title="Requirements Traceability Matrix", 
     icon="🔗"
 )
