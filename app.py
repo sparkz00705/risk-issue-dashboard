@@ -1,5 +1,23 @@
 import streamlit as st
 import pandas as pd
+import requests
+
+
+# --- HIT COUNTER (once per browser session) ---
+if "counted" not in st.session_state:
+    st.session_state["counted"] = True
+    try:
+        resp = requests.get(
+            "https://abacus.jasoncameron.dev/hit/risk-issue-dashboard.streamlit.app/visits",
+            timeout=3,
+        )
+        st.session_state["hit_count"] = resp.json().get("value", "—")
+    except Exception:
+        st.session_state["hit_count"] = None
+
+# Optional: show the count somewhere, e.g. in the sidebar
+if st.session_state.get("hit_count"):
+    st.sidebar.caption(f"👁️ Total visits: {st.session_state['hit_count']}")
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
