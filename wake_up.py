@@ -7,7 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-STREAMLIT_URL = os.environ.get("STREAMLIT_APP_URL", "https://ai-risk-issue-dashboard.streamlit.app/")
+# STREAMLIT_URL = os.environ.get("STREAMLIT_APP_URL", "https://ai-risk-issue-dashboard.streamlit.app/")
+STREAMLIT_URL = os.environ.get("STREAMLIT_APP_URL", "https://ai-risk-issue-dashboard.streamlit.app/?bot=wake")
 
 def main():
     options = Options()
