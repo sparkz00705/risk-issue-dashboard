@@ -24,6 +24,7 @@ jobs:
 
       - name: Run wake-up script
         env:
-          STREAMLIT_APP_URL: "https://ai-risk-issue-dashboard.streamlit.app/"
+         # STREAMLIT_APP_URL: "https://ai-risk-issue-dashboard.streamlit.app/"
+         STREAMLIT_APP_URL: "https://ai-risk-issue-dashboard.streamlit.app/?bot=wake"
         run: |
           python wake_up.py
